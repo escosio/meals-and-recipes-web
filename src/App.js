@@ -3,9 +3,9 @@ import './css/App.css';
 import Header from './components/Header';
 import MealsAccordian from './components/MealsAccordian';
 import { useState } from 'react';
-import { Button, Container, Row, ListGroup, ListGroupItem } from 'react-bootstrap';
+import { Button, Container, Row, ListGroup } from 'react-bootstrap';
 import MealTabs from './components/MealTabs';
-import RecipeModal from './components/RecipeItem';
+// import RecipeModal from './components/RecipeItem';
 import { useEffect } from 'react';
 import RecipeItem from './components/RecipeItem';
 
@@ -43,10 +43,8 @@ const App = () => {
     getRecipeData();
   }, []);
   /**
-   * old image card code
-   * {
-      meals.length > 0 && meals.map((recipe, i) => ( <Col><RecipeCard className="m4" recipeData={recipe} /></Col> ))
-    }
+   * Meals accordian code:
+   * <MealsAccordian mealsArray={meals}/>
    */
   return (
     <div className="App">
@@ -58,7 +56,7 @@ const App = () => {
             {meals.length > 0 &&
               meals.map((recipe, i) => (
                 // <ListGroupItem>{recipe.mealName}</ListGroupItem>
-                <RecipeItem recipe={recipe} />
+                <RecipeItem recipe={recipe} key={i}/>
               ))}
           </ListGroup>
         </Row>

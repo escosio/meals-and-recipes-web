@@ -6,7 +6,7 @@ import Modal from 'react-bootstrap/Modal';
  * ListGroupItem that represents a recipe, and if clicked on will display a fullscreen modal with recipe details. 
  * 
  * Accepts recipe object as parameter to fill out modal information
- * @param {recipeObject} param0 
+ * @param {recipe} param0 
  * @returns 
  */
 function RecipeItem({recipe}) {
