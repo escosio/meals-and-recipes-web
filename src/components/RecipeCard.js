@@ -1,6 +1,6 @@
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
-import RecipeModal from './RecipeModal';
+import RecipeModal from './RecipeItem';
 
 // To be deleted, now a list item
 const RecipeCard = ({recipeData}) => {

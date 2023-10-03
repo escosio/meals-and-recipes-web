@@ -5,8 +5,9 @@ import MealsAccordian from './components/MealsAccordian';
 import { useState } from 'react';
 import { Button, Container, Row, ListGroup, ListGroupItem } from 'react-bootstrap';
 import MealTabs from './components/MealTabs';
-import RecipeModal from './components/RecipeModal';
+import RecipeModal from './components/RecipeItem';
 import { useEffect } from 'react';
+import RecipeItem from './components/RecipeItem';
 
 
 const App = () => {
@@ -56,7 +57,8 @@ const App = () => {
           <ListGroup>
             {meals.length > 0 &&
               meals.map((recipe, i) => (
-                <ListGroupItem>{recipe.mealName}</ListGroupItem>
+                // <ListGroupItem>{recipe.mealName}</ListGroupItem>
+                <RecipeItem recipe={recipe} />
               ))}
           </ListGroup>
         </Row>
