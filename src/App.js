@@ -5,19 +5,18 @@ import MealsAccordian from './components/MealsAccordian';
 import { useState } from 'react';
 import { Button, Container, Row, ListGroup } from 'react-bootstrap';
 import MealTabs from './components/MealTabs';
-// import RecipeModal from './components/RecipeItem';
 import { useEffect } from 'react';
 import RecipeItem from './components/RecipeItem';
-
+import Spinner from 'react-bootstrap/Spinner';
+import Form from 'react-bootstrap/Form';
 
 const App = () => {
   const [meals, setMeals] = useState([]);
   const [allMeals, setAllMeals] = useState([]);
 
   const getRecipeData = (e) => {
-    // e.preventDefault()
     fetch("data.json")
-      .then( (response) => response.json())
+      .then((response) => response.json())
       .then((data) => {
         // return data
         setAllMeals(data);
@@ -36,7 +35,6 @@ const App = () => {
       const updatedMeals = allMeals.filter((recipe) => recipe.meal === mealTime);
       setMeals(updatedMeals);
     }
-    // setMeals(meals.filter( (recipe) => recipe.meal === mealTime));
   }
 
   useEffect(() => {
@@ -49,28 +47,22 @@ const App = () => {
   return (
     <div className="App">
       <Header title="Meals & Recipes" />
-      <MealTabs handleTabChange={updateMeals} />
-      <Container className="pt-2">
+      <Container className="pt-2 pb-3">
+        <MealTabs handleTabChange={updateMeals} />
         <Row>
-          <ListGroup>
+          <ListGroup as="ul">
             {meals.length > 0 &&
               meals.map((recipe, i) => (
-                // <ListGroupItem>{recipe.mealName}</ListGroupItem>
-                <RecipeItem recipe={recipe} key={i}/>
+                <RecipeItem recipe={recipe} key={i} />
               ))}
           </ListGroup>
         </Row>
       </Container>
-
       {meals.length === 0 && (
         <div>
-          <h1>
-            Oh no! We weren't able to fetch data successfully. Click the button
-            below to try again
-          </h1>
-          <Button className="m10" variant="primary" onClick={getRecipeData}>
-            Get recipes
-          </Button>
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
         </div>
       )}
     </div>

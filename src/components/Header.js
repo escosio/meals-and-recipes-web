@@ -5,6 +5,10 @@ import NavDropdown from "react-bootstrap/NavDropdown";
 import { Button, Col, Form, FormControl, Row } from "react-bootstrap";
 import { useState } from "react";
 
+/**
+ * Header component for application
+ * @returns 
+ */
 function Header() {
   const [searchValue, updateSearchValue] = useState("");
 
