@@ -9,7 +9,7 @@
     "meal": "Breakfast",
     "mealName": "Cereal & Banana",
     "ingredient": "cheerios and bananas",
-    "instructions": "tbd"
+    "instructions": "Just put cheerios in a bowl with milk next to a banana."
   },
   {
     "meal": "Breakfast",
@@ -38,8 +38,8 @@
   {
     "meal": "Lunch",
     "mealName": "PBJ and snacks",
-    "ingredient": "tbd",
-    "instructions": "tbd"
+    "ingredient": "Bread, Peanut Butter, Jelly",
+    "instructions": "Put it all together"
   },
   {
     "meal": "Lunch",
@@ -58,12 +58,6 @@
     "mealName": "Meatballs",
     "ingredient": "1 lb. Beef, one egg, about 1/2 cup GF bread crumbs, 1 teaspoon salt, 1/2 tsp garlic powder, some dried parsley, some dried basil,some grated cheese,  a splash of water or milk for moistness. Mix up well and shape into balls.",
     "instructions": "More breadcrumbs, 2 GF bread toasted then in a blender. \n\n425 for 15 min\n\nSJ:\nMilk \nBreadcrumbs \nItalian seasoning \nSalt and pepper \nGarlic powder \n\nFrom SJ\nBlend cooled bread\nPut in bowl\nAdd salt, pepper, garlic powder, herbs\nAdd a tiny bit of milk at a time, stirring, until you have a thick slurry\nMix in beef\nMeatballify\n\nBake at 425 for 15 minutes"
-  },
-  {
-    "meal": "Dinner",
-    "mealName": "Taco meat",
-    "ingredient": "tbd",
-    "instructions": "https://amindfullmom.com/3-ingredient-taco-meat-and-4-ways-to-use-it/"
   },
   {
     "meal": "Dinner",
@@ -172,5 +166,11 @@
     "mealName": "Pepper Steak Stir Fry",
     "ingredient": "1 tablespoon vegetable oil divided use\n1 red bell pepper cored, seeded and cut into strips\n1 green bell pepper cored, seeded and cut into strips\n1 1/4 pounds flank steak thinly sliced\n2 teaspoons minced garlic\n1 teaspoon minced ginger\nsalt and pepper to taste\n1/4 cup soy sauce\n1 1/2 tablespoons sugar\n1 1/2 tablespoons cornstarch",
     "instructions": "Heat 1 teaspoon of the vegetable oil over medium high heat in a large pan.\nAdd the peppers and cook for 3-4 minutes or until just tender. Remove the peppers from the pan and place on a plate.\nAdd the remaining oil to the pan. Season the flank steak with salt and pepper to taste.\nIncrease heat to high. Add the steak to the pan and cook for 5-6 minutes or until lightly browned.\nAdd the garlic and ginger, then cook for 30 seconds.\nPlace the peppers back in the pan with the steak.\nIn a small bowl, whisk together the soy sauce, sugar, 1/4 cup water and cornstarch. \nPour the sauce over the steak mixture and bring to a simmer. Cook for 2-3 minutes or until sauce has just thickened, then serve."
+  },
+  {
+    "meal": "Dinner",
+    "mealName": "Fried Rice and dumplings",
+    "ingredient": "tbd",
+    "instructions": "tbd"
   }
 ]
