@@ -13,6 +13,10 @@ function RecipeItem({recipe}) {
   const [fullscreen, setFullscreen] = useState(true);
   const [show, setShow] = useState(false);
 
+  /**
+   * Private function to trigger the modal to show for a RecipeItem
+   * @param {*} breakpoint 
+   */
   function handleShow(breakpoint) {
     setFullscreen(breakpoint);
     setShow(true);

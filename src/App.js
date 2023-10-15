@@ -1,19 +1,30 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './css/App.css';
-import Header from './components/Header';
-import MealsAccordian from './components/MealsAccordian';
-import { useState } from 'react';
-import { Button, Container, Row, ListGroup } from 'react-bootstrap';
-import MealTabs from './components/MealTabs';
-import { useEffect } from 'react';
-import RecipeItem from './components/RecipeItem';
-import Spinner from 'react-bootstrap/Spinner';
-import Form from 'react-bootstrap/Form';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./css/App.css";
+import Header from "./components/Header";
+import MealsAccordian from "./components/MealsAccordian";
+import { useState } from "react";
+import {
+  Button,
+  Container,
+  Row,
+  ListGroup,
+  Col,
+  Stack,
+  Form,
+} from "react-bootstrap";
+import MealTabs from "./components/MealTabs";
+import { useEffect } from "react";
+import RecipeItem from "./components/RecipeItem";
+import Spinner from "react-bootstrap/Spinner";
 
 const App = () => {
   const [meals, setMeals] = useState([]);
   const [allMeals, setAllMeals] = useState([]);
 
+  /**
+   * Fetches the data from the json file and stores it as allMeals
+   * @param {Event} e
+   */
   const getRecipeData = (e) => {
     fetch("data.json")
       .then((response) => response.json())
@@ -27,15 +38,28 @@ const App = () => {
       });
   };
 
+  /**
+   * Filters meals and sets the value of meals
+   * @param { string } mealTime
+   */
   const updateMeals = (mealTime) => {
     if (mealTime === "All") {
       getRecipeData();
       setMeals(allMeals);
     } else {
-      const updatedMeals = allMeals.filter((recipe) => recipe.meal === mealTime);
+      const updatedMeals = allMeals.filter(
+        (recipe) => recipe.meal === mealTime
+      );
       setMeals(updatedMeals);
     }
-  }
+  };
+
+  const getRandomRecipe = () => {
+    const listLength = meals.length;
+    const randomNumber = Math.floor(Math.random() * listLength);
+    return meals[randomNumber];
+    // setMeals(meals[randomNumber]) //  this is breaking things
+  };
 
   useEffect(() => {
     getRecipeData();
@@ -46,15 +70,18 @@ const App = () => {
    */
   return (
     <div className="App">
-      <Header title="Meals & Recipes" />
+      <Header title="Meals & Recipes" data={allMeals} />
       <Container className="pt-2 pb-3">
+        {/* {meals && (
+          <div>
+            <Button onClick={getRandomRecipe}>Get random recipe</Button>
+          </div>
+        )} */}
         <MealTabs handleTabChange={updateMeals} />
         <Row>
           <ListGroup as="ul">
             {meals.length > 0 &&
-              meals.map((recipe, i) => (
-                <RecipeItem recipe={recipe} key={i} />
-              ))}
+              meals.map((recipe, i) => <RecipeItem recipe={recipe} key={i} />)}
           </ListGroup>
         </Row>
       </Container>
@@ -67,6 +94,6 @@ const App = () => {
       )}
     </div>
   );
-}
+};
 
 export default App;

@@ -2,9 +2,7 @@ import React from 'react';
 import Accordion from 'react-bootstrap/Accordion';
 import AccordionBody from 'react-bootstrap/esm/AccordionBody';
 import AccordionHeader from 'react-bootstrap/esm/AccordionHeader';
-// import RecipeCard from './RecipeCard';
 import RecipeItem from './RecipeItem';
-import RecipeCard from './RecipeCard';
 import { ListGroup } from 'react-bootstrap';
 
 /**
