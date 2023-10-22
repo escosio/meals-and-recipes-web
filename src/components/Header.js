@@ -20,7 +20,6 @@ function Header({ data, searchAction }) {
         recipe.mealName.toLowerCase().includes(searchValue.toLowerCase())
       );
       updateRecipes(filteredResults);
-      updateSearchValue("");
     }
   };
 
