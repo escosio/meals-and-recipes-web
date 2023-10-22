@@ -1,8 +1,7 @@
 import Container from "react-bootstrap/Container";
 import Navbar from "react-bootstrap/Navbar";
-import { Button, Col, Form, ListGroup, Row } from "react-bootstrap";
+import { Button, Col, Form, ListGroup, Row, Nav, Stack } from "react-bootstrap";
 import { useState } from "react";
-import ViewToggle from "./ViewToggle";
 import RecipeItem from "./RecipeItem";
 
 /**
@@ -21,44 +20,37 @@ function Header({ data, searchAction }) {
         recipe.mealName.toLowerCase().includes(searchValue.toLowerCase())
       );
       updateRecipes(filteredResults);
+      updateSearchValue("");
     }
   };
 
   return (
     <Navbar variant="dark" bg="dark" expand="lg" className="headernav">
-      <Navbar.Brand href="#home">Meals & Recipes</Navbar.Brand>
-      {/* <ViewToggle toggleText="Change layout" /> */}
-      <Form onSubmit={handleSearch}>
-        <Form inline>
-          <Row>
-            <Col xs="auto">
-              <Form.Control
-                type="search"
-                value={searchValue}
-                onChange={(e) => updateSearchValue(e.target.value)}
-                placeholder="Search recipe..."
-                className="mr-sm-2"
-                onSubmit={handleSearch}
-              />
-            </Col>
-            <Col>
-              <Button onClick={handleSearch}>Search</Button>
-            </Col>
-          </Row>
-          <Row>
-            <Container>
-              <ListGroup>
-                {recipes.length > 0 && searchValue && 
-                  recipes.map((value, i) => (
-                    <RecipeItem key={i} recipe={value} />
-                    // <ListGroup.Item key={i}>{value.mealName}</ListGroup.Item>
-                  ))}
-              </ListGroup>
-            </Container>
-          </Row>
+      <Navbar.Brand href="#home">Meals & Recipes <i class="fa-solid fa-utensils"></i></Navbar.Brand>
+      <Nav.Item>
+        <Form onSubmit={handleSearch}>
+          <Stack direction="horizontal" gap={1}>
+            <Form.Control
+              type="search"
+              value={searchValue}
+              onChange={(e) => updateSearchValue(e.target.value)}
+              placeholder="Search recipe..."
+              className="mr-sm-2"
+            />
+            <Button onClick={handleSearch}>Search</Button>
+          </Stack>
+          <Container>
+            <ListGroup>
+              {recipes.length > 0 &&
+                searchValue &&
+                recipes.map((value, i) => (
+                  <RecipeItem key={i} recipe={value} />
+                  // <ListGroup.Item key={i}>{value.mealName}</ListGroup.Item>
+                ))}
+            </ListGroup>
+          </Container>
         </Form>
-      </Form>
-      {/* </Container> */}
+      </Nav.Item>
     </Navbar>
   );
 }

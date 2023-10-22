@@ -15,3 +15,8 @@ code {
 .headerNav {
   height: 10vh;
 }
+
+.form-check-label {
+  color: white;
+  font-size: 6;
+}
