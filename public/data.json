@@ -9,7 +9,7 @@
     "meal": "Breakfast",
     "mealName": "Cereal & Banana",
     "ingredient": "cheerios and bananas",
-    "instructions": "Just put cheerios in a bowl with milk next to a banana."
+    "instructions": "tbd"
   },
   {
     "meal": "Breakfast",
@@ -38,8 +38,8 @@
   {
     "meal": "Lunch",
     "mealName": "PBJ and snacks",
-    "ingredient": "Bread, Peanut Butter, Jelly",
-    "instructions": "Put it all together"
+    "ingredient": "tbd",
+    "instructions": "tbd"
   },
   {
     "meal": "Lunch",
@@ -56,8 +56,14 @@
   {
     "meal": "Dinner",
     "mealName": "Meatballs",
-    "ingredient": "1 lb. Beef, one egg, about 1/2 cup GF bread crumbs, 1 teaspoon salt, 1/2 tsp garlic powder, some dried parsley, some dried basil,some grated cheese,  a splash of water or milk for moistness. Mix up well and shape into balls.",
+    "ingredient": "1 lb. Beef\none egg\nabout 1/2 cup GF bread crumbs\n1 teaspoon salt\n1/2 tsp garlic powder\nsome dried parsley\nsome dried basil\nsome grated cheese\na splash of water or milk for moistness\nMix up well and shape into balls.",
     "instructions": "More breadcrumbs, 2 GF bread toasted then in a blender. \n\n425 for 15 min\n\nSJ:\nMilk \nBreadcrumbs \nItalian seasoning \nSalt and pepper \nGarlic powder \n\nFrom SJ\nBlend cooled bread\nPut in bowl\nAdd salt, pepper, garlic powder, herbs\nAdd a tiny bit of milk at a time, stirring, until you have a thick slurry\nMix in beef\nMeatballify\n\nBake at 425 for 15 minutes"
+  },
+  {
+    "meal": "Dinner",
+    "mealName": "Taco meat from scratch",
+    "ingredient": "",
+    "instructions": "https://amindfullmom.com/3-ingredient-taco-meat-and-4-ways-to-use-it/"
   },
   {
     "meal": "Dinner",
@@ -79,8 +85,26 @@
   },
   {
     "meal": "Dinner",
-    "mealName": "Pizza",
+    "mealName": "Chicken Parm (or Eggplant)",
+    "ingredient": "Italian bread \nSauce\nMozzarella cheese\nChicken \nEgg",
+    "instructions": "Make Breadcrumbs\nPreheat the oven to 425\nMake breadcrumbs and put on a plate\nTenderize the chicken a bit\nPut Egg into bowl\n\nDip chicken in the egg then on the plate of breadcrumbs\nThen drop on the pan and put in over for 10 min\nAfter 10 min, flip cutlet and put sauce and cheese on chicken \nHeat for another 10 min"
+  },
+  {
+    "meal": "Dinner",
+    "mealName": "Fried Rice and dumplings",
     "ingredient": "tbd",
+    "instructions": "tbd"
+  },
+  {
+    "meal": "Dinner",
+    "mealName": "Nuggets, Mashed Potatoes, Green Beans",
+    "ingredient": "Frozen Nuggets, Quick Mash potato mix, Green beans, olive oil, garlic clove or paste",
+    "instructions": "Green beans: https://www.recipetineats.com/garlic-sauteed-green-beans/"
+  },
+  {
+    "meal": "Dinner",
+    "mealName": "Pizza",
+    "ingredient": "N/A",
     "instructions": "order from Bay Ridge Pizza https://www.seamless.com/menu/bay-ridge-pizzeria-7704-5th-ave-brooklyn/272804"
   },
   {
@@ -118,12 +142,6 @@
     "mealName": "Meatloaf",
     "ingredient": "tbd",
     "instructions": "tbd"
-  },
-  {
-    "meal": "Dinner",
-    "mealName": "Chicken / Eggplant Parm",
-    "ingredient": "Italian bread \nSauce\nMozzarella cheese\nChicken \nEgg",
-    "instructions": ""
   },
   {
     "meal": "All",
@@ -169,8 +187,8 @@
   },
   {
     "meal": "Dinner",
-    "mealName": "Fried Rice and dumplings",
-    "ingredient": "tbd",
-    "instructions": "tbd"
+    "mealName": "Buttery Rice and Chicken",
+    "ingredient": "",
+    "instructions": ""
   }
 ]
