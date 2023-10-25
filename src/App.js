@@ -4,13 +4,11 @@ import Header from "./components/Header";
 import MealsAccordian from "./components/MealsAccordian";
 import { useState } from "react";
 import {
-  Button,
   Container,
   Row,
   ListGroup,
-  Col,
   Stack,
-  Form,
+  Button
 } from "react-bootstrap";
 import MealTabs from "./components/MealTabs";
 import { useEffect } from "react";
@@ -71,12 +69,15 @@ const App = () => {
   return (
     <div className="App">
       <Header title="Meals & Recipes" data={allMeals} />
+      {/* <Stack gap={2} className="home-screen">
+        <Button className="recipe-button">Breakfast</Button>
+        <Button className="recipe-button">Lunch</Button>
+        <Button className="recipe-button">Dinner</Button>
+        <Button className="recipe-button">All</Button>
+      </Stack> */}
+
       <Container className="pt-2 pb-3">
-        {/* {meals && (
-          <div>
-            <Button onClick={getRandomRecipe}>Get random recipe</Button>
-          </div>
-        )} */}
+        <p className="tutorial">Tap on a row below to view the recipe.</p>
         <MealTabs handleTabChange={updateMeals} />
         <Row>
           <ListGroup as="ul">
@@ -85,6 +86,7 @@ const App = () => {
           </ListGroup>
         </Row>
       </Container>
+      {/* <MealsAccordian /> */}
       {meals.length === 0 && (
         <div>
           <Spinner animation="border" role="status">
@@ -92,6 +94,7 @@ const App = () => {
           </Spinner>
         </div>
       )}
+      {/* <footer>Made with love and hunger</footer> */}
     </div>
   );
 };

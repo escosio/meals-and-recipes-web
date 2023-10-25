@@ -24,7 +24,7 @@ function RecipeItem({recipe}) {
 
   return (
     <>
-      <ListGroupItem onClick={()=> handleShow(true)}>{recipe.mealName}</ListGroupItem>
+      <ListGroupItem className="recipe-item" style={{"display":"inline-grid"}}><div onClick={()=> handleShow(true)}>{recipe.mealName}</div></ListGroupItem>
       <Modal show={show} fullscreen={fullscreen} onHide={() => setShow(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{recipe.mealName}</Modal.Title>

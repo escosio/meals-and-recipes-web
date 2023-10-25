@@ -36,3 +36,48 @@
     transform: rotate(360deg);
   }
 }
+.headernav {
+  padding: 10px;
+}
+
+.tutorial {
+  /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+  font-style: italic;
+  color: #282c34;
+}
+
+.meal-tabs-container {
+  margin: auto 1% auto;
+}
+
+/* .recipe-item {
+  background-color: whitesmoke;
+  font-weight: bold;
+} */
+
+.recipe-item:hover {
+  font-weight: bold;
+  background-color: whitesmoke;
+  /* color: white; */
+  cursor: pointer;
+}
+
+.home-screen {
+  margin: 7% 15%;
+}
+
+.recipe-button {
+  background-color: red;
+  border: none;
+  padding: 2%;
+  margin: .5%;
+}
+
+.recipe-button:hover {
+  background-color: darkred;
+}
+
+/* recipe item component */
+.list-group-item {
+  display: inline-block;
+}

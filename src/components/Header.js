@@ -24,8 +24,8 @@ function Header({ data, searchAction }) {
   };
 
   return (
-    <Navbar variant="dark" bg="dark" expand="lg" className="headernav">
-      <Navbar.Brand href="#home">Meals & Recipes <i class="fa-solid fa-utensils"></i></Navbar.Brand>
+    <Navbar variant="dark" bg="dark" expand="xs" className="headernav">
+      <Navbar.Brand md={10} href="#home">Meals & Recipes <i class="fa-solid fa-utensils"></i></Navbar.Brand>
       <Nav.Item>
         <Form onSubmit={handleSearch}>
           <Stack direction="horizontal" gap={1}>
