@@ -50,10 +50,10 @@
   margin: auto 1% auto;
 }
 
-/* .recipe-item {
-  background-color: whitesmoke;
-  font-weight: bold;
-} */
+.recipe-item {
+  white-space: pre;
+  display: inline-grid;
+}
 
 .recipe-item:hover {
   font-weight: bold;
@@ -80,4 +80,14 @@
 /* recipe item component */
 .list-group-item {
   display: inline-block;
+}
+
+[ht-key]::after {
+  content: attr(ht-key);
+  color:orange;
+}
+
+[ht-value]::after {
+  content: attr(ht-value);
+  color:black;
 }

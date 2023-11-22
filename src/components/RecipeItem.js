@@ -32,6 +32,7 @@ function RecipeItem({recipe}) {
         <Modal.Body>
           <>
           <h3>Ingredients</h3>
+          {/* {{recipe.ingredient}.split("\n").map((item) => <p>{item}</p>)} */}
           <p>{recipe.ingredient}</p>
           <h3>Instructions</h3>
           <p>{recipe.instructions}</p>

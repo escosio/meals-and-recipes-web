@@ -14,6 +14,7 @@ import MealTabs from "./components/MealTabs";
 import { useEffect } from "react";
 import RecipeItem from "./components/RecipeItem";
 import Spinner from "react-bootstrap/Spinner";
+import "./htapi"
 
 const App = () => {
   const [meals, setMeals] = useState([]);
@@ -69,13 +70,10 @@ const App = () => {
   return (
     <div className="App">
       <Header title="Meals & Recipes" data={allMeals} />
-      {/* <Stack gap={2} className="home-screen">
-        <Button className="recipe-button">Breakfast</Button>
-        <Button className="recipe-button">Lunch</Button>
-        <Button className="recipe-button">Dinner</Button>
-        <Button className="recipe-button">All</Button>
-      </Stack> */}
-
+      {/* <script src="https://cdn.htapi.io/modules/htapi-v1-agr.js"></script>
+      <div>
+        <p ht-data ht-source="zip-api" ht-key="country"></p>
+      </div> */}
       <Container className="pt-2 pb-3">
         <p className="tutorial">Tap on a row below to view the recipe.</p>
         <MealTabs handleTabChange={updateMeals} />

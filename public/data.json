@@ -190,5 +190,23 @@
     "mealName": "Buttery Rice and Chicken",
     "ingredient": "",
     "instructions": ""
+  },
+  {
+    "meal": "Dinner",
+    "mealName": "Zesty Fried Chicken",
+    "ingredient": "1/2 c. buttermilk\n2 tsp. no-salt blackening seasoning\nkosher salt\n4 c. cornflakes\n1 tbsp. olive oil\n1/2 c. fresh flat-leaf parsley, chopped\n8 small chicken drumsticks (about 2 lb.), skin removed",
+    "instructions": "STEP 1\nHeat oven to 375 degrees F. Line a rimmed baking sheet with nonstick foil. In a shallow bowl, combine the buttermilk, blackening seasoning and 3/4 teaspoon salt.\nSTEP 2\nFinely crush the cornflakes and transfer to a second bowl. Toss with the oil, then the parsley.\nSTEP 3\nDip the chicken in the buttermilk, letting any excess drip off, then coat in the cornflakes, pressing gently to help them adhere. Transfer to the prepared baking sheet.\nSTEP 4\nBake until the chicken is golden brown and cooked through, 30 to 35 minutes."
+  },
+  {
+    "meal": "Dinner",
+    "mealName": "Grilled Cheese",
+    "ingredient": "Butter\nCheese\nBread",
+    "instructions": "Step 1\nSpread 1 tablespoon butter on one side of each slice of bread. With butter side down, top each slice of bread with about ½ cup cheddar. \nStep 2\nIn a skillet over medium heat, melt 1 tablespoon butter. Add two slices of bread, butter side down. Cook until bread is golden and cheese is starting to melt, about 2 minutes. Flip one piece of bread on top of the other and continue to cook until cheese is melty, about 30 seconds more. \nStep 3\nRepeat for the second sandwich, wiping skillet clean if necessary. "
+  },
+  {
+    "meal": "Lunch",
+    "mealName": "Escarole Soup",
+    "ingredient": "2 bunches of fresh escarole, \n2 or 3 boxes of chicken broth, \n1 lb of ground meat (beef or turkey), \na clove of garlic",
+    "instructions": "Cook down the escarole in a large pot with some water and make the meatballs using the recipe for Sunday meatballs but roll them smaller. \nAdd the garlic and broth and let it boil. \nAdd the meatballs and they will cook in the broth. \nIf you need more broth add water and Better Than Bouillon. \nSprinkle in adobo, salt and pepper to taste. \nYou can add GF noodles if you want. Serve with grated Parmesan. That’s it!"
   }
-]
+ ]
