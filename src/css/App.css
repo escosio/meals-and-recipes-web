@@ -1,10 +1,16 @@
 .App {
   text-align: center;
+  background-color: lightblue;
 }
 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+}
+
+.recipe-container {
+  max-width: 300px;
+  min-width: 70%;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -38,6 +44,17 @@
 }
 .headernav {
   padding: 10px;
+}
+
+.navbar-brand {
+  padding: 20px;
+}
+
+.nav-item {
+  background-color: aliceblue;
+}
+.nav-item a {
+  color: black;
 }
 
 .tutorial {

@@ -1,8 +1,9 @@
 import Container from "react-bootstrap/Container";
 import Navbar from "react-bootstrap/Navbar";
-import { Button, Col, Form, ListGroup, Row, Nav, Stack } from "react-bootstrap";
+import { Button, Form, ListGroup, Nav, Stack } from "react-bootstrap";
 import { useState } from "react";
 import RecipeItem from "./RecipeItem";
+import "../css/App.css";
 
 /**
  * Header component for application, has brand text and search bar. The function accepts a object parameter for recipe object data to use against search
@@ -44,7 +45,6 @@ function Header({ data, searchAction }) {
                 searchValue &&
                 recipes.map((value, i) => (
                   <RecipeItem key={i} recipe={value} />
-                  // <ListGroup.Item key={i}>{value.mealName}</ListGroup.Item>
                 ))}
             </ListGroup>
           </Container>

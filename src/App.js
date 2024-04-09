@@ -1,14 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./css/App.css";
 import Header from "./components/Header";
-import MealsAccordian from "./components/MealsAccordian";
 import { useState } from "react";
 import {
   Container,
   Row,
   ListGroup,
-  Stack,
-  Button
 } from "react-bootstrap";
 import MealTabs from "./components/MealTabs";
 import { useEffect } from "react";
@@ -74,7 +71,7 @@ const App = () => {
       <div>
         <p ht-data ht-source="zip-api" ht-key="country"></p>
       </div> */}
-      <Container className="pt-2 pb-3">
+      <Container className="pt-2 pb-3 recipe-container">
         <p className="tutorial">Tap on a row below to view the recipe.</p>
         <MealTabs handleTabChange={updateMeals} />
         <Row>
