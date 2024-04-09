@@ -9,8 +9,7 @@
 }
 
 .recipe-container {
-  max-width: 300px;
-  min-width: 70%;
+  max-width: 800px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
