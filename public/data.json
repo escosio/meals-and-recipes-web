@@ -208,5 +208,11 @@
     "mealName": "Escarole Soup",
     "ingredient": "2 bunches of fresh escarole, \n2 or 3 boxes of chicken broth, \n1 lb of ground meat (beef or turkey), \na clove of garlic",
     "instructions": "Cook down the escarole in a large pot with some water and make the meatballs using the recipe for Sunday meatballs but roll them smaller. \nAdd the garlic and broth and let it boil. \nAdd the meatballs and they will cook in the broth. \nIf you need more broth add water and Better Than Bouillon. \nSprinkle in adobo, salt and pepper to taste. \nYou can add GF noodles if you want. Serve with grated Parmesan. That’s it!"
+  },
+  {
+    "meal": "Dinner",
+    "mealName": "Chicken Alfredo",
+    "ingredient": "Chicken, Fettuccine, Rao's Alfredo Sauce",
+    "instructions": "Season and tenderize the chicken, then pan-fry in oil and butter, for 6 minutes a side, or until an internal temperature reaches 165 degrees F. Transfer to a cutting board and let rest for a few minutes, then cut into 1/2-inch thick slices. Tent with foil, while you prepare the sauce."
   }
- ]
+]

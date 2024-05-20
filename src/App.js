@@ -2,16 +2,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./css/App.css";
 import Header from "./components/Header";
 import { useState } from "react";
-import {
-  Container,
-  Row,
-  ListGroup,
-} from "react-bootstrap";
+import { Container, Row, ListGroup, ToggleButton } from "react-bootstrap";
 import MealTabs from "./components/MealTabs";
 import { useEffect } from "react";
 import RecipeItem from "./components/RecipeItem";
 import Spinner from "react-bootstrap/Spinner";
-import "./htapi"
+import "./htapi";
+import MealsAccordian from "./components/MealsAccordian";
 
 const App = () => {
   const [meals, setMeals] = useState([]);
@@ -54,34 +51,28 @@ const App = () => {
     const listLength = meals.length;
     const randomNumber = Math.floor(Math.random() * listLength);
     return meals[randomNumber];
+
     // setMeals(meals[randomNumber]) //  this is breaking things
   };
 
   useEffect(() => {
     getRecipeData();
   }, []);
-  /**
-   * Meals accordian code:
-   * <MealsAccordian mealsArray={meals}/>
-   */
+
   return (
     <div className="App">
       <Header title="Meals & Recipes" data={allMeals} />
-      {/* <script src="https://cdn.htapi.io/modules/htapi-v1-agr.js"></script>
-      <div>
-        <p ht-data ht-source="zip-api" ht-key="country"></p>
-      </div> */}
       <Container className="pt-2 pb-3 recipe-container">
         <p className="tutorial">Tap on a row below to view the recipe.</p>
-        <MealTabs handleTabChange={updateMeals} />
+        <MealsAccordian mealsArray={meals} />
+        {/* <MealTabs handleTabChange={updateMeals} />
         <Row>
           <ListGroup as="ul">
             {meals.length > 0 &&
               meals.map((recipe, i) => <RecipeItem recipe={recipe} key={i} />)}
           </ListGroup>
-        </Row>
+        </Row> */}
       </Container>
-      {/* <MealsAccordian /> */}
       {meals.length === 0 && (
         <div>
           <Spinner animation="border" role="status">
@@ -89,7 +80,7 @@ const App = () => {
           </Spinner>
         </div>
       )}
-      {/* <footer>Made with love and hunger</footer> */}
+      <footer>Made with love and hunger</footer>
     </div>
   );
 };

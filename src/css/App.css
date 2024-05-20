@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  background-color: lightblue;
+  /* background-color: lightblue; */
 }
 
 .App-logo {
@@ -86,7 +86,7 @@
   background-color: red;
   border: none;
   padding: 2%;
-  margin: .5%;
+  margin: 0.5%;
 }
 
 .recipe-button:hover {
@@ -100,10 +100,10 @@
 
 [ht-key]::after {
   content: attr(ht-key);
-  color:orange;
+  color: orange;
 }
 
 [ht-value]::after {
   content: attr(ht-value);
-  color:black;
+  color: black;
 }
