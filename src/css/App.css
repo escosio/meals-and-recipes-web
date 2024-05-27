@@ -42,7 +42,8 @@
   }
 }
 .headernav {
-  padding: 10px;
+  height: 100px;
+  margin-bottom: 10px;
 }
 
 .navbar-brand {

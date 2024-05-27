@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./css/App.css";
 import Header from "./components/Header";
 import { useState } from "react";
-import { Container, Row, ListGroup, ToggleButton } from "react-bootstrap";
+import { Container, Row, ListGroup, Button } from "react-bootstrap";
 import MealTabs from "./components/MealTabs";
 import { useEffect } from "react";
 import RecipeItem from "./components/RecipeItem";
@@ -13,6 +13,8 @@ import MealsAccordian from "./components/MealsAccordian";
 const App = () => {
   const [meals, setMeals] = useState([]);
   const [allMeals, setAllMeals] = useState([]);
+  const [viewAccordianState, setAccordianViewState] = useState(true);
+  const [randomRecipe, setRandomRecipe] = useState({});
 
   /**
    * Fetches the data from the json file and stores it as allMeals
@@ -50,9 +52,12 @@ const App = () => {
   const getRandomRecipe = () => {
     const listLength = meals.length;
     const randomNumber = Math.floor(Math.random() * listLength);
-    return meals[randomNumber];
-
+    setRandomRecipe(meals[randomNumber]);
     // setMeals(meals[randomNumber]) //  this is breaking things
+  };
+
+  const toggleView = () => {
+    setAccordianViewState(!viewAccordianState);
   };
 
   useEffect(() => {
@@ -62,16 +67,29 @@ const App = () => {
   return (
     <div className="App">
       <Header title="Meals & Recipes" data={allMeals} />
+      <Button variant="secondary" onClick={toggleView}>
+        Change view type
+      </Button>
       <Container className="pt-2 pb-3 recipe-container">
         <p className="tutorial">Tap on a row below to view the recipe.</p>
-        <MealsAccordian mealsArray={meals} />
-        {/* <MealTabs handleTabChange={updateMeals} />
-        <Row>
-          <ListGroup as="ul">
-            {meals.length > 0 &&
-              meals.map((recipe, i) => <RecipeItem recipe={recipe} key={i} />)}
-          </ListGroup>
-        </Row> */}
+        <>
+          {/* <button onClick={getRandomRecipe}>Random Recipe</button> */}
+          {/* {randomRecipe && <RecipeItem recipe={randomRecipe} />} */}
+        </>
+        {viewAccordianState && <MealsAccordian mealsArray={meals} />}
+        {!viewAccordianState && (
+          <>
+            <MealTabs handleTabChange={updateMeals} />
+            <Row>
+              <ListGroup as="ul">
+                {meals.length > 0 &&
+                  meals.map((recipe, i) => (
+                    <RecipeItem recipe={recipe} key={i} />
+                  ))}
+              </ListGroup>
+            </Row>
+          </>
+        )}
       </Container>
       {meals.length === 0 && (
         <div>
