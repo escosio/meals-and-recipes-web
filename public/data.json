@@ -214,5 +214,11 @@
     "mealName": "Chicken Alfredo",
     "ingredient": "Chicken, Fettuccine, Rao's Alfredo Sauce",
     "instructions": "Season and tenderize the chicken, then pan-fry in oil and butter, for 6 minutes a side, or until an internal temperature reaches 165 degrees F. Transfer to a cutting board and let rest for a few minutes, then cut into 1/2-inch thick slices. Tent with foil, while you prepare the sauce."
+  },
+  {
+    "meal": "Dinner",
+    "mealName": "Chicken Pesto",
+    "ingredient": "Chicken, Pesto, Pasta",
+    "instructions": "tbd"
   }
 ]
