@@ -72,7 +72,7 @@ const App = () => {
       <Container className="pt-2 pb-3 recipe-container">
         <Button
           style={{ marginBottom: "20px" }}
-          variant="secondary"
+          variant="light"
           onClick={toggleView}
         >
           Change view type

@@ -1,9 +1,3 @@
-import Container from "react-bootstrap/Container";
-import Navbar from "react-bootstrap/Navbar";
-import { Button, Form, ListGroup, Nav, Stack } from "react-bootstrap";
-import { useState } from "react";
-import RecipeItem from "./RecipeItem";
-import Search from "./Search";
 import "../css/App.css";
 
 /**
@@ -14,12 +8,11 @@ function Header({ data, searchAction }) {
   // const recipeData = data;
 
   return (
-    <Navbar variant="dark" bg="dark" className="headernav">
-      <Navbar.Brand md={10} href="#home">
+    <nav className="headernav">
+      <h1>
         Meals & Recipes <i class="fa-solid fa-utensils"></i>
-      </Navbar.Brand>
-      <Nav.Item>{/* <Search data={recipeData} /> */}</Nav.Item>
-    </Navbar>
+      </h1>
+    </nav>
   );
 }
 
