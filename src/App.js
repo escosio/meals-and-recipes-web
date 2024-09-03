@@ -9,6 +9,7 @@ import RecipeItem from "./components/RecipeItem";
 import Spinner from "react-bootstrap/Spinner";
 import "./htapi";
 import MealsAccordian from "./components/MealsAccordian";
+import Search from "./components/Search";
 
 const App = () => {
   const [meals, setMeals] = useState([]);
@@ -67,10 +68,16 @@ const App = () => {
   return (
     <div className="App">
       <Header title="Meals & Recipes" data={allMeals} />
-      <Button variant="secondary" onClick={toggleView}>
-        Change view type
-      </Button>
+
       <Container className="pt-2 pb-3 recipe-container">
+        <Button
+          style={{ marginBottom: "20px" }}
+          variant="secondary"
+          onClick={toggleView}
+        >
+          Change view type
+        </Button>
+        <Search data={allMeals} />
         <p className="tutorial">Tap on a row below to view the recipe.</p>
         <>
           {/* <button onClick={getRandomRecipe}>Random Recipe</button> */}
