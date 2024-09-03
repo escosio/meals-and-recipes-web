@@ -21,7 +21,7 @@ function MealsAccordian({ mealsArray }) {
   const dinnerMeals = mealsArray.filter((recipe) => recipe.meal === "Dinner");
 
   return (
-    <Accordion className="mt-6">
+    <Accordion className="mt-6" defaultActiveKey="3">
       <Accordion.Item eventKey="0">
         <Accordion.Header>Breakfast</Accordion.Header>
         <Accordion.Body>
