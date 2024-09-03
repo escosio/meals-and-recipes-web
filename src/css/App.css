@@ -110,3 +110,10 @@
   content: attr(ht-value);
   color: black;
 }
+
+.random-recipe {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 50px;
+}

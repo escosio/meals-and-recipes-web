@@ -15,7 +15,6 @@ const App = () => {
   const [meals, setMeals] = useState([]);
   const [allMeals, setAllMeals] = useState([]);
   const [viewAccordianState, setAccordianViewState] = useState(true);
-  const [randomRecipe, setRandomRecipe] = useState({});
 
   /**
    * Fetches the data from the json file and stores it as allMeals
@@ -50,13 +49,6 @@ const App = () => {
     }
   };
 
-  const getRandomRecipe = () => {
-    const listLength = meals.length;
-    const randomNumber = Math.floor(Math.random() * listLength);
-    setRandomRecipe(meals[randomNumber]);
-    // setMeals(meals[randomNumber]) //  this is breaking things
-  };
-
   const toggleView = () => {
     setAccordianViewState(!viewAccordianState);
   };
@@ -79,10 +71,6 @@ const App = () => {
         </Button>
         <Search data={allMeals} />
         <p className="tutorial">Tap on a row below to view the recipe.</p>
-        <>
-          {/* <button onClick={getRandomRecipe}>Random Recipe</button> */}
-          {/* {randomRecipe && <RecipeItem recipe={randomRecipe} />} */}
-        </>
         {viewAccordianState && <MealsAccordian mealsArray={meals} />}
         {!viewAccordianState && (
           <>
@@ -97,6 +85,7 @@ const App = () => {
             </Row>
           </>
         )}
+        {/* <RandomRecipe mealData={allMeals} /> */}
       </Container>
       {meals.length === 0 && (
         <div>
@@ -111,3 +100,19 @@ const App = () => {
 };
 
 export default App;
+
+function RandomRecipe({ mealData }) {
+  const [randomRecipe, setRandomRecipe] = useState(null);
+
+  const getRandomRecipe = () => {
+    const listLength = mealData.length;
+    const randomNumber = Math.floor(Math.random() * listLength);
+    setRandomRecipe(mealData[randomNumber]);
+  };
+  return (
+    <div className="random-recipe">
+      {<Button onClick={getRandomRecipe}>Random Recipe</Button>}
+      {randomRecipe && <RecipeItem recipe={randomRecipe} />}
+    </div>
+  );
+}
