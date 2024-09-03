@@ -5,8 +5,6 @@ import "../css/App.css";
  * @returns
  */
 function Header({ data, searchAction }) {
-  // const recipeData = data;
-
   return (
     <nav className="headernav">
       <h1>
