@@ -35,16 +35,17 @@ function RecipeItem({ recipe }) {
           <>
             <h3>Ingredients</h3>
             {recipe.ingredient.split("\n").map((item) => (
-              <li>{item}</li>
+              <Ingredient ingredient={item} />
             ))}
             <h3>Instructions</h3>
-            <p>
-              <ol>
-                {recipe.instructions.split("\n").map((step) => (
-                  <li>{step}</li>
-                ))}
-              </ol>
-            </p>
+            {recipe.instructions > 0 ? recipe.instructions.split("\n").map((step) => (
+              <li style={{ listStyle: "none" }}>
+                {/* TODO: add state to cross out line */}
+                {/* <input type="checkbox" /> */}
+                {step}
+              </li>
+            )) : <p>No instructions available</p>}
+
           </>
         </Modal.Body>
       </Modal>
@@ -53,3 +54,16 @@ function RecipeItem({ recipe }) {
 }
 
 export default RecipeItem;
+
+
+function Ingredient({ ingredient }) {
+  const [completed, setCompleted] = useState(false);
+  return (
+    <li style={{ listStyle: "none" }}>
+      <input type="checkbox" onChange={() => setCompleted(!completed)} />
+      <label style={{ textDecoration: completed ? "line-through" : "none" }}>
+        {ingredient}
+      </label>
+    </li>
+  );
+}
