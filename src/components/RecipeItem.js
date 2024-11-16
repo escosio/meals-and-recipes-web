@@ -12,6 +12,7 @@ import Modal from "react-bootstrap/Modal";
 function RecipeItem({ recipe }) {
   const [fullscreen, setFullscreen] = useState(true);
   const [show, setShow] = useState(false);
+  const hasInstructions = recipe.instructions.length > 0;
 
   /**
    * Private function to trigger the modal to show for a RecipeItem
@@ -34,18 +35,21 @@ function RecipeItem({ recipe }) {
         <Modal.Body>
           <>
             <h3>Ingredients</h3>
-            {recipe.ingredient.split("\n").map((item) => (
-              <Ingredient ingredient={item} />
+            {recipe.ingredient.split("\n").map((item, i) => (
+              <Ingredient ingredient={item} key={i} />
             ))}
             <h3>Instructions</h3>
-            {recipe.instructions > 0 ? recipe.instructions.split("\n").map((step) => (
-              <li style={{ listStyle: "none" }}>
-                {/* TODO: add state to cross out line */}
-                {/* <input type="checkbox" /> */}
-                {step}
-              </li>
-            )) : <p>No instructions available</p>}
-
+            {hasInstructions > 0 ? (
+              recipe.instructions.split("\n").map((step, i) => (
+                <li style={{ listStyle: "none" }} key={i}>
+                  {/* TODO: add state to cross out line */}
+                  {/* <input type="checkbox" /> */}
+                  {step}
+                </li>
+              ))
+            ) : (
+              <p>No instructions available</p>
+            )}
           </>
         </Modal.Body>
       </Modal>
@@ -54,7 +58,6 @@ function RecipeItem({ recipe }) {
 }
 
 export default RecipeItem;
-
 
 function Ingredient({ ingredient }) {
   const [completed, setCompleted] = useState(false);

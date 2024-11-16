@@ -8,7 +8,7 @@ function Header({ data, searchAction }) {
   return (
     <nav className="headernav">
       <h1>
-        Meals & Recipes <i class="fa-solid fa-utensils"></i>
+        Meals & Recipes <i className="fa-solid fa-utensils"></i>
       </h1>
     </nav>
   );
