@@ -39,7 +39,7 @@ function RecipeItem({ recipe }) {
               <Ingredient ingredient={item} key={i} />
             ))}
             <h3>Instructions</h3>
-            {hasInstructions > 0 ? (
+            {hasInstructions ? (
               recipe.instructions.split("\n").map((step, i) => (
                 <li style={{ listStyle: "none" }} key={i}>
                   {/* TODO: add state to cross out line */}
@@ -61,10 +61,16 @@ export default RecipeItem;
 
 function Ingredient({ ingredient }) {
   const [completed, setCompleted] = useState(false);
+
   return (
     <li style={{ listStyle: "none" }}>
-      <input type="checkbox" onChange={() => setCompleted(!completed)} />
-      <label style={{ textDecoration: completed ? "line-through" : "none" }}>
+      <input type="checkbox" onChange={() => setCompleted((c) => !c)} />
+      <label
+        style={{
+          textDecoration: completed ? "line-through" : "none",
+          marginLeft: "5px",
+        }}
+      >
         {ingredient}
       </label>
     </li>

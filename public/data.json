@@ -36,6 +36,18 @@
     "instructions": "Mix "
   },
   {
+    "meal": "Breakfast",
+    "mealName": "Bagels",
+    "ingredient": "",
+    "instructions": ""
+  },
+  {
+    "meal": "Breakfast",
+    "mealName": "Oatmeal",
+    "ingredient": "",
+    "instructions": ""
+  },
+  {
     "meal": "Lunch",
     "mealName": "PBJ and snacks",
     "ingredient": "tbd",
@@ -67,7 +79,7 @@
   },
   {
     "meal": "Dinner",
-    "mealName": "Pork chops & rice",
+    "mealName": "Pork chops & arroz",
     "ingredient": "- Get thin pork chops\n- Milk\n- Oil\n- Rice\n- Beans\n- Onions",
     "instructions": "Season chops with adobo\nOil pan\nPour milk onto chops (instead of egg)\nBread chops in plate\nPut oil on top \n10 min on broil (one side)\n\n1 cup rice, 2 cup water\nBoil water throw in salt and oil \nLet the water boil Down\n\nFor beans \n1/4 onion\n1 garlic clove\n1/4 of tomato sauce( less)\nCouple chunks of sofrito 4tbsp\nCook on low"
   },
@@ -140,7 +152,7 @@
   {
     "meal": "Dinner",
     "mealName": "Meatloaf",
-    "ingredient": "tbd",
+    "ingredient": "1 1/2 lbs pound ground chuck beef\n  3/4 chopped onion\n 1 egg\n 2 tbps ketchup\n 1 cup milk\n 1 tsp salt\n breadcrumb evenly over top(optional)",
     "instructions": "tbd"
   },
   {
@@ -226,17 +238,5 @@
     "mealName": "Potato Salad",
     "ingredient": "5 pounds red potatoes, chopped, 3 cups mayonnaise, 2 cups finely chopped pickles, 5 large hard-cooked eggs, chopped, ½ cup chopped red onion,½ cup chopped celery, 3 tablespoons prepared mustard, 1 tablespoon apple cider vinegar,1 teaspoon salt, or to taste,  ½ teaspoon ground black pepper",
     "instructions": "https://www.allrecipes.com/recipe/232864/potato-salad/"
-  },
-  {
-    "meal": "Breakfast",
-    "mealName": "Bagels",
-    "ingredient": "",
-    "instructions": ""
-  },
-  {
-    "meal": "Breakfast",
-    "mealName": "Oatmeal",
-    "ingredient": "",
-    "instructions": ""
   }
 ]
