@@ -34,22 +34,24 @@ function RecipeItem({ recipe }) {
         </Modal.Header>
         <Modal.Body>
           <>
-            <h3>Ingredients</h3>
-            {recipe.ingredient.split("\n").map((item, i) => (
-              <Ingredient ingredient={item} key={i} />
-            ))}
-            <h3>Instructions</h3>
-            {hasInstructions ? (
-              recipe.instructions.split("\n").map((step, i) => (
-                <li style={{ listStyle: "none" }} key={i}>
-                  {/* TODO: add state to cross out line */}
-                  {/* <input type="checkbox" /> */}
-                  {step}
-                </li>
-              ))
-            ) : (
-              <p>No instructions available</p>
-            )}
+            <div style={{ marginBottom: "10px" }}>
+              <h3>Ingredients</h3>
+              {recipe.ingredient.split("\n").map((item, i) => (
+                <Ingredient ingredient={item} key={i} />
+              ))}
+            </div>
+            <div style={{ marginBottom: "10px" }}>
+              <h3>Instructions</h3>
+              <ol>
+                {hasInstructions ? (
+                  recipe.instructions
+                    .split("\n")
+                    .map((step, i) => <li key={i}>{step}</li>)
+                ) : (
+                  <p>No instructions available</p>
+                )}
+              </ol>
+            </div>
           </>
         </Modal.Body>
       </Modal>
@@ -63,8 +65,25 @@ function Ingredient({ ingredient }) {
   const [completed, setCompleted] = useState(false);
 
   return (
-    <li style={{ listStyle: "none" }}>
-      <input type="checkbox" onChange={() => setCompleted((c) => !c)} />
+    <li
+      style={{
+        listStyle: "none",
+        display: "flex",
+        border: "1px solid #ddd",
+        borderRadius: "4px",
+        padding: "5px",
+        marginBottom: "5px",
+        backgroundColor: completed ? "#f0f0f0" : "transparent",
+      }}
+      onClick={() => setCompleted((c) => !c)}
+    >
+      <input
+        type="checkbox"
+        checked={completed}
+        onChange={() => {
+          setCompleted((c) => !c);
+        }}
+      />
       <label
         style={{
           textDecoration: completed ? "line-through" : "none",
