@@ -4,34 +4,17 @@ import Header from "./components/Header";
 import { useState } from "react";
 import { Container, Row, ListGroup, Button } from "react-bootstrap";
 import MealTabs from "./components/MealTabs";
-import { useEffect } from "react";
 import RecipeItem from "./components/RecipeItem";
 import Spinner from "react-bootstrap/Spinner";
 import "./htapi";
 import MealsAccordian from "./components/MealsAccordian";
 import Search from "./components/Search";
+import { recipes } from "./recipes";
 
 const App = () => {
-  const [meals, setMeals] = useState([]);
-  const [allMeals, setAllMeals] = useState([]);
+  const [meals, setMeals] = useState(recipes);
+  const allMeals = recipes;
   const [viewAccordianState, setAccordianViewState] = useState(true);
-
-  /**
-   * Fetches the data from the json file and stores it as allMeals
-   * @param {Event} e
-   */
-  const getRecipeData = (e) => {
-    fetch("data.json")
-      .then((response) => response.json())
-      .then((data) => {
-        // return data
-        setAllMeals(data);
-        setMeals(data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
 
   /**
    * Filters meals and sets the value of meals
@@ -39,11 +22,10 @@ const App = () => {
    */
   const updateMeals = (mealTime) => {
     if (mealTime === "All") {
-      getRecipeData();
       setMeals(allMeals);
     } else {
       const updatedMeals = allMeals.filter(
-        (recipe) => recipe.meal === mealTime
+        (recipe) => recipe.meal === mealTime,
       );
       setMeals(updatedMeals);
     }
@@ -52,10 +34,6 @@ const App = () => {
   const toggleView = () => {
     setAccordianViewState(!viewAccordianState);
   };
-
-  useEffect(() => {
-    getRecipeData();
-  }, []);
 
   return (
     <div className="App">
@@ -85,7 +63,7 @@ const App = () => {
             </Row>
           </>
         )}
-        {/* <RandomRecipe mealData={allMeals} /> */}
+        <RandomRecipe mealData={allMeals} />
       </Container>
       {meals.length === 0 && (
         <div>
