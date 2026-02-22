@@ -17,6 +17,12 @@ export const recipes: Recipe[] = [
   },
   {
     meal: "Breakfast",
+    mealName: "Waffles",
+    ingredient: "Waffles homestyle frozen waffles.",
+    instructions: "Toast and coast",
+  },
+  {
+    meal: "Breakfast",
     mealName: "French Toast",
     ingredient:
       "1 egg\n1 teaspoon McCormick® All Natural Pure Vanilla Extract\n1/2 teaspoon McCormick® Ground Cinnamon\n1/4 cup milk\n4 slices hearty sandwich bread",
@@ -101,6 +107,12 @@ export const recipes: Recipe[] = [
     instructions:
       "Defrost frozen empanada dough for 2-3 hours.\nOn medium heat cook homemade sofrito with tomato sauce until fragrant. Then add lean ground beef.\nCrumble the meat and season with sazon, adobo, cumin, dried oregano and red pepper flakes.\nOnce meat is brown add diced potatoes and allow remaining liquid to steam potatoes until tender. Cool your mixture.\nOn a flat surface, sprinkle some all purpose flour and lay out your empanada dough.\nAdd a tablespoon of the meat mixture in the center of the dough. Fold over the dough and firmly press with your thumbs. To properly seal the seam, crimp the edges with a fork.\nIn hot oil, fry the empanadas for 1 minute on each side. Let them rest on a paper-towel and enjoy!",
   },
+  {
+    meal: "Dinner",
+    mealName: "Kielbasa",
+    ingredient: "Kielbasa, mashed potatoes,  saurkraut",
+    instructions: "",
+  },
   // {
   //   meal: "Dinner",
   //   mealName: "Meatloaf",
@@ -155,14 +167,14 @@ export const recipes: Recipe[] = [
       "Banana\nBlueberries\nFrozen spinach\nApplesauce\nPeanut butter\nLittle bit of water ",
     instructions: "Add items to blender as stick a straw in, voila!",
   },
-  {
-    meal: "Dinner",
-    mealName: "Roasted Chicken and Veggies with Rice",
-    ingredient:
-      "Chicken pieces (thighs shown)\nVegetables, cut into pieces (smaller/thinner pieces cook faster) Oil, for drizzling (I used avocado oil)\nWhite rice (jasmine rice shown, cooked using 1:1.5 ratio of rice to water) Salt, pepper, or other herbs/spices for vegetables (optional) Other sauce or seasoning for chicken (optional)\nButter/olive oil (optional)",
-    instructions:
-      "1. Preheat oven to 375 degrees F / 190 degrees C.\n2. Put chicken in an oven-safe dish. Cover tightly with an oven-safe lid or with foil.\n3. Put chopped veggies on a baking sheet. Drizzle with oil, salt, pepper, or any spices you are using for the chicken. Use your hands to make sure all veggies are coated with oil. Cover the baking sheet with foil, shiny side down toward the veggies.\n4. Bake for approximately 25 minutes. See time saver note for alternate cooking methods.\n5. Once chicken and veggies are in the oven, cook rice according to package directions.\n6. Serve rice with butter or olive oil, if desired.",
-  },
+  // {
+  //   meal: "Dinner",
+  //   mealName: "Roasted Chicken and Veggies with Rice",
+  //   ingredient:
+  //     "Chicken pieces (thighs shown)\nVegetables, cut into pieces (smaller/thinner pieces cook faster) Oil, for drizzling (I used avocado oil)\nWhite rice (jasmine rice shown, cooked using 1:1.5 ratio of rice to water) Salt, pepper, or other herbs/spices for vegetables (optional) Other sauce or seasoning for chicken (optional)\nButter/olive oil (optional)",
+  //   instructions:
+  //     "1. Preheat oven to 375 degrees F / 190 degrees C.\n2. Put chicken in an oven-safe dish. Cover tightly with an oven-safe lid or with foil.\n3. Put chopped veggies on a baking sheet. Drizzle with oil, salt, pepper, or any spices you are using for the chicken. Use your hands to make sure all veggies are coated with oil. Cover the baking sheet with foil, shiny side down toward the veggies.\n4. Bake for approximately 25 minutes. See time saver note for alternate cooking methods.\n5. Once chicken and veggies are in the oven, cook rice according to package directions.\n6. Serve rice with butter or olive oil, if desired.",
+  // },
   {
     meal: "Dinner",
     mealName: "Ropa Vieja",

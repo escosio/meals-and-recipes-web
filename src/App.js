@@ -49,8 +49,9 @@ const App = () => {
         </Button>
         <Search data={allMeals} />
         <p className="tutorial">Tap on a row below to view the recipe.</p>
-        {viewAccordianState && <MealsAccordian mealsArray={meals} />}
-        {!viewAccordianState && (
+        {viewAccordianState ? (
+          <MealsAccordian mealsArray={meals} />
+        ) : (
           <>
             <MealTabs handleTabChange={updateMeals} />
             <Row>
@@ -66,11 +67,9 @@ const App = () => {
         <RandomRecipe mealData={allMeals} />
       </Container>
       {meals.length === 0 && (
-        <div>
-          <Spinner animation="border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </Spinner>
-        </div>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
       )}
       <footer>Made with love and hunger</footer>
     </div>
