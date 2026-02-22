@@ -1,4 +1,13 @@
-export const recipes = [
+type Recipe = {
+  meal: mealType;
+  mealName: string;
+  ingredient: string;
+  instructions: string;
+};
+
+type mealType = "Breakfast" | "Lunch" | "Dinner" | "All";
+
+export const recipes: Recipe[] = [
   {
     meal: "Breakfast",
     mealName: "Pancakes",
