@@ -52,15 +52,7 @@ const App = () => {
           <MealsAccordian mealsArray={meals} />
         ) : (
           <>
-            <MealTabs handleTabChange={updateMeals} />
-            <Row>
-              <ListGroup as="ul">
-                {meals.length > 0 &&
-                  meals.map((recipe, i) => (
-                    <RecipeItem recipe={recipe} key={i} />
-                  ))}
-              </ListGroup>
-            </Row>
+            <MealTabs handleTabChange={updateMeals} meals={meals} />
           </>
         )}
         <RandomRecipe mealData={allMeals} />
