@@ -9,6 +9,7 @@ import Spinner from "react-bootstrap/Spinner";
 import MealsAccordian from "./components/MealsAccordian";
 import Search from "./components/Search";
 import { recipes } from "./recipes";
+import { RandomRecipe } from "./utils/RandomRecipe";
 
 const App = () => {
   const [meals, setMeals] = useState(recipes);
@@ -68,19 +69,3 @@ const App = () => {
 };
 
 export default App;
-
-function RandomRecipe({ mealData }) {
-  const [randomRecipe, setRandomRecipe] = useState(null);
-
-  const getRandomRecipe = () => {
-    const listLength = mealData.length;
-    const randomNumber = Math.floor(Math.random() * listLength);
-    setRandomRecipe(mealData[randomNumber]);
-  };
-  return (
-    <div className="random-recipe">
-      {<Button onClick={getRandomRecipe}>Random Recipe</Button>}
-      {randomRecipe && <RecipeItem recipe={randomRecipe} />}
-    </div>
-  );
-}
