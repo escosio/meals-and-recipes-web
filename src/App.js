@@ -6,7 +6,6 @@ import { Container, Row, ListGroup, Button } from "react-bootstrap";
 import MealTabs from "./components/MealTabs";
 import RecipeItem from "./components/RecipeItem";
 import Spinner from "react-bootstrap/Spinner";
-import "./htapi";
 import MealsAccordian from "./components/MealsAccordian";
 import Search from "./components/Search";
 import { recipes } from "./recipes";
