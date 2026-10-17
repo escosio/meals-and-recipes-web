@@ -27,10 +27,7 @@ export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe }) {
   return (
     <section aria-labelledby="recipes-title">
       <header className="weeknav">
-        <div>
-          <h1 id="recipes-title">Recipes</h1>
-          <p className="sub">{recipes.length} in the book. Tap one to read it or add it to the week.</p>
-        </div>
+        <h1 id="recipes-title">Recipes</h1>
       </header>
 
       <div className="toolbar">
@@ -48,6 +45,7 @@ export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe }) {
           {FILTERS.map((f) => (
             <button key={f} className="chip" aria-pressed={filter === f} onClick={() => setFilter(f)}>
               {f}
+              {f === "All" && <span className="count">{recipes.length}</span>}
             </button>
           ))}
         </div>

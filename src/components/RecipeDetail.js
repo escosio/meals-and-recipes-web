@@ -2,7 +2,7 @@ import { useState } from "react";
 import Sheet from "./Sheet";
 import { PLAN_MEALS, getRecipe, linkify, hostOf } from "../lib/recipes";
 import { weekDays, toISODate, weekdayShort } from "../lib/dates";
-import { dowOf, dowName } from "../lib/plan";
+import { dowOf, dowName, toList } from "../lib/plan";
 
 function Text({ text }) {
   return linkify(text).map((part, i) =>
@@ -24,7 +24,7 @@ export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot,
   if (!recipe) return <Sheet open={false} onClose={onClose} title="" />;
 
   const toggle = (i) => setChecked((c) => ({ ...c, [i]: !c[i] }));
-  const repeats = slot ? routine[dowOf(slot.date)]?.[slot.meal] === recipe.id : false;
+  const repeats = slot ? toList(routine[dowOf(slot.date)]?.[slot.meal]).includes(recipe.id) : false;
   const dayLabel = slot ? dowName(dowOf(slot.date)) : "";
   const subtitle = recipe.isNote ? "Not a recipe" : recipe.meal === "Any" ? "Any time" : recipe.meal;
 
@@ -36,15 +36,15 @@ export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot,
 
   const footer = slot ? (
     <>
-      <button className="btn danger" onClick={() => onRemove(slot)}>
+      <button className="btn danger" onClick={() => onRemove(slot, recipe.id)}>
         Remove from {weekdayShort(new Date(slot.date + "T00:00"))}
       </button>
-      <button className="btn quiet" onClick={() => onRepeat(slot, repeats ? null : recipe.id)}>
+      <button className="btn quiet" onClick={() => onRepeat(slot, recipe.id, !repeats)}>
         {repeats ? `Stop repeating on ${dayLabel}s` : `Repeat every ${dayLabel}`}
       </button>
       <span className="spacer" />
       <button className="btn primary" onClick={() => onSwap(slot)}>
-        Swap recipe
+        Add or swap
       </button>
     </>
   ) : (
@@ -126,17 +126,18 @@ function DayPicker({ recipe, weekStart, getSlot, onPick }) {
               {weekdayShort(d)} <small>{d.getDate()}</small>
             </div>
             {PLAN_MEALS.map((meal) => {
-              const current = getRecipe(getSlot(key, meal).id);
+              const current = getSlot(key, meal).ids.map(getRecipe).filter(Boolean);
+              const already = current.some((r) => r.id === recipe.id);
               const fits = recipe.meal === "Any" || recipe.meal === meal;
               return (
                 <button
                   key={meal}
-                  className={`dp-slot${current ? " filled" : ""}`}
+                  className={`dp-slot${current.length ? " filled" : ""}`}
                   onClick={() => onPick({ date: key, meal })}
-                  title={current ? `Replace ${current.name}` : `Add to ${meal}`}
+                  disabled={already}
                   style={fits ? undefined : { opacity: 0.5 }}
                 >
-                  {current ? `Replace ${current.name}` : "Add here"}
+                  {already ? "Already planned" : current.length ? `Add with ${current.map((r) => r.name).join(", ")}` : "Add here"}
                 </button>
               );
             })}

@@ -10,7 +10,11 @@ export default function Sheet({ open, onClose, title, subtitle, children, footer
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (open && !el.open) el.showModal();
+    if (open && !el.open) {
+      el.showModal();
+      const body = el.querySelector(".sheet-body");
+      if (body) body.scrollTop = 0;
+    }
     if (!open && el.open) el.close();
   }, [open]);
 

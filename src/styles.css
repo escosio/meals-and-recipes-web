@@ -360,6 +360,12 @@ a {
   transition: border-color 120ms ease, background 120ms ease;
 }
 
+.slot .items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .slot .name {
   display: block;
   font-weight: 700;
@@ -367,6 +373,18 @@ a {
   line-height: 1.15;
   letter-spacing: -0.02em;
   overflow-wrap: anywhere;
+}
+
+.slot .items .name + .name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.slot .name.note {
+  color: var(--ink-2);
+  font-style: italic;
+  font-weight: 500;
 }
 
 .slot .flags {
@@ -391,12 +409,6 @@ a {
   color: var(--muted);
   font-weight: 500;
   font-size: 16px;
-}
-
-.slot.note .name {
-  color: var(--ink-2);
-  font-style: italic;
-  font-weight: 500;
 }
 
 .slot:hover {
@@ -514,6 +526,18 @@ a {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--bg);
+}
+
+.chip .count {
+  margin-left: 5px;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.chip[aria-pressed="true"] .count {
+  color: inherit;
+  opacity: 0.7;
 }
 
 .chips.tags {
@@ -945,6 +969,39 @@ a {
 }
 
 /* ---------- Picker ---------- */
+.tonight {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tonight li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 14px;
+  border-radius: var(--r-md);
+  background: var(--green-soft);
+}
+
+.tonight .tonight-name {
+  flex: 1;
+  text-align: left;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  color: var(--green-ink);
+  padding: 6px 0;
+}
+
+.tonight li.note .tonight-name {
+  font-style: italic;
+  font-weight: 500;
+}
+
 .note-row {
   border-top: 1px solid var(--line-strong);
   color: var(--green-ink);

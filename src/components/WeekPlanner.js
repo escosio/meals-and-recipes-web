@@ -17,7 +17,7 @@ export default function WeekPlanner({ weekStart, onChangeWeek, getSlot, onOpenSl
   const relative = relativeWeekLabel(weekStart);
   const meal = PLAN_MEALS[0];
 
-  const filled = days.filter((d) => getSlot(toISODate(d), meal).id).length;
+  const filled = days.filter((d) => getSlot(toISODate(d), meal).ids.length > 0).length;
 
   return (
     <section aria-labelledby="plan-title">
@@ -47,9 +47,9 @@ export default function WeekPlanner({ weekStart, onChangeWeek, getSlot, onOpenSl
           const key = toISODate(d);
           const isToday = isSameDay(d, today);
           const isPast = !isToday && d < today;
-          const { id, fromRoutine } = getSlot(key, meal);
-          const recipe = getRecipe(id);
-          const cls = recipe ? (recipe.isNote ? "slot note" : "slot") : "slot vacant";
+          const { ids, routineIds } = getSlot(key, meal);
+          const items = ids.map(getRecipe).filter(Boolean);
+          const cls = items.length ? "slot" : "slot vacant";
           return (
             <div key={key} className={`day${isToday ? " today" : ""}${isPast ? " past" : ""}`}>
               <div className="day-head">
@@ -59,13 +59,23 @@ export default function WeekPlanner({ weekStart, onChangeWeek, getSlot, onOpenSl
               <button
                 className={cls}
                 onClick={() => onOpenSlot({ date: key, meal })}
-                aria-label={`${weekdayLong(d)} dinner: ${recipe ? recipe.name : "nothing planned"}`}
+                aria-label={`${weekdayLong(d)} dinner: ${items.length ? items.map((r) => r.name).join(" and ") : "nothing planned"}`}
               >
-                <span className="name">{recipe ? recipe.name : "Add dinner"}</span>
-                {recipe && (fromRoutine || (!recipe.isNote && !recipe.hasRecipe)) && (
+                {items.length === 0 ? (
+                  <span className="name">Add dinner</span>
+                ) : (
+                  <span className="items">
+                    {items.map((r) => (
+                      <span key={r.id} className={`name${r.isNote ? " note" : ""}`}>
+                        {r.name}
+                      </span>
+                    ))}
+                  </span>
+                )}
+                {items.length > 0 && (routineIds.length > 0 || items.some((r) => !r.isNote && !r.hasRecipe)) && (
                   <span className="flags">
-                    {fromRoutine && <span className="flag">every week</span>}
-                    {!recipe.isNote && !recipe.hasRecipe && <span className="flag">no recipe</span>}
+                    {routineIds.length > 0 && <span className="flag">every week</span>}
+                    {items.some((r) => !r.isNote && !r.hasRecipe) && <span className="flag">no recipe</span>}
                   </span>
                 )}
               </button>

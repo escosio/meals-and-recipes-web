@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Sheet from "./Sheet";
-import { recipes, QUICK_OPTIONS, fitsMeal, searchRecipes, filterByTags, randomRecipe, recipeSummary, noteId } from "../lib/recipes";
+import { recipes, QUICK_OPTIONS, fitsMeal, searchRecipes, filterByTags, randomRecipe, recipeSummary, noteId, getRecipe } from "../lib/recipes";
 import TagFilter from "./TagFilter";
 import { weekdayLong } from "../lib/dates";
 
-export default function RecipePicker({ open, slot, plannedIds, onClose, onPick }) {
+export default function RecipePicker({ open, slot, current, plannedIds, onClose, onPick, onRemove, onOpenRecipe }) {
   const [query, setQuery] = useState("");
   const [onlyThisMeal, setOnlyThisMeal] = useState(true);
   const [tags, setTags] = useState([]);
@@ -26,6 +26,8 @@ export default function RecipePicker({ open, slot, plannedIds, onClose, onPick }
   if (!slot) return <Sheet open={false} onClose={onClose} title="" />;
 
   const dayName = weekdayLong(new Date(slot.date + "T00:00"));
+  const tonight = (current?.ids || []).map(getRecipe).filter(Boolean);
+  const onSlot = new Set(tonight.map((r) => r.id));
   const pickRandom = () => {
     // Respect the tag filter so "Pick for me" with Kids on picks a kid dinner.
     const pool = list.filter((r) => r.hasRecipe && !plannedIds.has(r.id));
@@ -35,7 +37,26 @@ export default function RecipePicker({ open, slot, plannedIds, onClose, onPick }
   };
 
   return (
-    <Sheet open={open} onClose={onClose} title={`${dayName} ${slot.meal.toLowerCase()}`} subtitle="Choose what to make">
+    <Sheet
+      open={open}
+      onClose={onClose}
+      title={`${dayName} ${slot.meal.toLowerCase()}`}
+      subtitle={tonight.length ? "Tap a dish to read it, or add another" : "Choose what to make"}
+    >
+      {tonight.length > 0 && (
+        <ul className="tonight" aria-label="Already planned">
+          {tonight.map((r) => (
+            <li key={r.id} className={r.isNote ? "note" : ""}>
+              <button className="tonight-name" onClick={() => onOpenRecipe(slot, r.id)}>
+                {r.name}
+              </button>
+              <button className="btn icon quiet" aria-label={`Remove ${r.name}`} onClick={() => onRemove(slot, r.id)}>
+                ×
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="toolbar" style={{ marginTop: 0 }}>
         <div className="search">
           <span className="glyph" aria-hidden="true">⌕</span>
@@ -85,7 +106,11 @@ export default function RecipePicker({ open, slot, plannedIds, onClose, onPick }
                   <small>{recipeSummary(r)}</small>
                 </div>
                 <div className="meta">
-                  {plannedIds.has(r.id) && <span className="pill gold">Planned</span>}
+                  {onSlot.has(r.id) ? (
+                    <span className="pill">Tonight</span>
+                  ) : (
+                    plannedIds.has(r.id) && <span className="pill gold">Planned</span>
+                  )}
                   {!onlyThisMeal && <span className="pill muted">{r.meal === "Any" ? "Any time" : r.meal}</span>}
                 </div>
               </button>

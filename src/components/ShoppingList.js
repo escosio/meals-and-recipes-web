@@ -14,10 +14,12 @@ export default function ShoppingList({ weekStart, onChangeWeek, getSlot, checked
     for (const d of weekDays(weekStart)) {
       const key = toISODate(d);
       for (const meal of PLAN_MEALS) {
-        const r = getRecipe(getSlot(key, meal).id);
-        if (!r || r.isNote || r.ingredients.length === 0) continue;
-        if (!map.has(r.id)) map.set(r.id, { recipe: r, days: [] });
-        map.get(r.id).days.push(weekdayShort(d));
+        for (const id of getSlot(key, meal).ids) {
+          const r = getRecipe(id);
+          if (!r || r.isNote || r.ingredients.length === 0) continue;
+          if (!map.has(r.id)) map.set(r.id, { recipe: r, days: [] });
+          map.get(r.id).days.push(weekdayShort(d));
+        }
       }
     }
     return Array.from(map.values());

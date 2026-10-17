@@ -8,7 +8,7 @@ import ShoppingList from "./components/ShoppingList";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { PLAN_MEALS, getRecipe, randomRecipe } from "./lib/recipes";
 import { startOfWeek, weekDays, toISODate, weekdayShort } from "./lib/dates";
-import { DEFAULT_ROUTINE, resolveSlot, dowOf, dowName } from "./lib/plan";
+import { DEFAULT_ROUTINE, resolveSlot, toList, dowOf, dowName } from "./lib/plan";
 
 const VIEWS = [
   { id: "plan", label: "Plan" },
@@ -42,31 +42,26 @@ export default function App() {
     for (const d of weekDays(weekStart)) {
       const dayKey = toISODate(d);
       for (const meal of PLAN_MEALS) {
-        const { id } = resolveSlot(plan, routine, dayKey, meal);
-        if (!id) continue;
-        if (!map.has(id)) map.set(id, []);
-        map.get(id).push(weekdayShort(d));
+        for (const id of resolveSlot(plan, routine, dayKey, meal).ids) {
+          if (!map.has(id)) map.set(id, []);
+          map.get(id).push(weekdayShort(d));
+        }
       }
     }
     return map;
   }, [plan, routine, weekStart]);
   const plannedIds = useMemo(() => new Set(plannedThisWeek.keys()), [plannedThisWeek]);
 
-  const assign = useCallback(
-    (slot, recipeId) => {
-      setPlan((p) => ({ ...p, [slot.date]: { ...(p[slot.date] || {}), [slot.meal]: recipeId } }));
-    },
-    [setPlan],
-  );
-
-  const remove = useCallback(
-    (slot) => {
-      const routineId = routine[dowOf(slot.date)]?.[slot.meal];
+  // Write a slot's list for one week. An empty list is kept as an explicit
+  // override when the routine would otherwise fill the night.
+  const writeSlot = useCallback(
+    (slot, ids) => {
+      const routineIds = toList(routine[dowOf(slot.date)]?.[slot.meal]);
       setPlan((p) => {
         const day = { ...(p[slot.date] || {}) };
-        // Keep an explicit null so the routine doesn't refill it this week.
-        if (routineId) day[slot.meal] = null;
-        else delete day[slot.meal];
+        const sameAsRoutine = ids.length === routineIds.length && ids.every((id, i) => id === routineIds[i]);
+        if (sameAsRoutine || (ids.length === 0 && routineIds.length === 0)) delete day[slot.meal];
+        else day[slot.meal] = ids;
         const next = { ...p };
         if (Object.keys(day).length) next[slot.date] = day;
         else delete next[slot.date];
@@ -76,39 +71,43 @@ export default function App() {
     [setPlan, routine],
   );
 
-  const setRepeat = (slot, recipeId) => {
+  // Add a recipe to a night (keeps whatever is already there).
+  const assign = useCallback(
+    (slot, recipeId) => {
+      const { ids } = resolveSlot(plan, routine, slot.date, slot.meal);
+      if (ids.includes(recipeId)) return;
+      writeSlot(slot, [...ids, recipeId]);
+    },
+    [plan, routine, writeSlot],
+  );
+
+  // Remove one recipe from a night, or everything when no id is given.
+  const remove = useCallback(
+    (slot, recipeId) => {
+      const { ids } = resolveSlot(plan, routine, slot.date, slot.meal);
+      writeSlot(slot, recipeId ? ids.filter((id) => id !== recipeId) : []);
+    },
+    [plan, routine, writeSlot],
+  );
+
+  const setRepeat = (slot, recipeId, on) => {
     const dow = dowOf(slot.date);
     setRoutine((r) => {
       const day = { ...(r[dow] || {}) };
-      if (recipeId) day[slot.meal] = recipeId;
+      const ids = toList(day[slot.meal]).filter((id) => id !== recipeId);
+      if (on) ids.push(recipeId);
+      if (ids.length) day[slot.meal] = ids;
       else delete day[slot.meal];
       const next = { ...r };
       if (Object.keys(day).length) next[dow] = day;
       else delete next[dow];
       return next;
     });
-    if (recipeId) {
-      // The week's own entry is now redundant; let the routine supply it.
-      setPlan((p) => {
-        const day = { ...(p[slot.date] || {}) };
-        if (day[slot.meal] === recipeId) delete day[slot.meal];
-        const next = { ...p };
-        if (Object.keys(day).length) next[slot.date] = day;
-        else delete next[slot.date];
-        return next;
-      });
-      setToast(`${getRecipe(recipeId).name} every ${dowName(dow)}`);
-    } else {
-      setToast(`No longer repeats on ${dowName(dow)}s`);
-    }
+    setToast(on ? `${getRecipe(recipeId).name} every ${dowName(dow)}` : `${getRecipe(recipeId).name} no longer repeats on ${dowName(dow)}s`);
     setDetail(null);
   };
 
-  const openSlot = (slot) => {
-    const current = getSlot(slot.date, slot.meal).id;
-    if (current && getRecipe(current)) setDetail({ recipeId: current, slot });
-    else setPicker(slot);
-  };
+  const openSlot = (slot) => setPicker(slot);
 
   const handlePick = (slot, recipeId) => {
     assign(slot, recipeId);
@@ -129,11 +128,11 @@ export default function App() {
       const next = { ...p };
       for (const d of weekDays(weekStart)) {
         const key = toISODate(d);
-        if (resolveSlot(next, routine, key, "Dinner").id) continue;
+        if (resolveSlot(next, routine, key, "Dinner").ids.length) continue;
         const r = randomRecipe("Dinner", used);
         if (!r) break;
         used.add(r.id);
-        next[key] = { ...(next[key] || {}), Dinner: r.id };
+        next[key] = { ...(next[key] || {}), Dinner: [r.id] };
       }
       return next;
     });
@@ -173,6 +172,11 @@ export default function App() {
     }
     return n;
   }, [plannedIds]);
+
+  const openFromPicker = (slot, recipeId) => {
+    setPicker(null);
+    setDetail({ recipeId, slot });
+  };
 
   return (
     <div className="app">
@@ -230,8 +234,8 @@ export default function App() {
         onClose={() => setDetail(null)}
         onRepeat={setRepeat}
         onAssign={handleAssignFromDetail}
-        onRemove={(slot) => {
-          remove(slot);
+        onRemove={(slot, recipeId) => {
+          remove(slot, recipeId);
           setDetail(null);
         }}
         onSwap={(slot) => {
@@ -239,7 +243,16 @@ export default function App() {
           setPicker(slot);
         }}
       />
-      <RecipePicker open={!!picker} slot={picker} plannedIds={plannedIds} onClose={() => setPicker(null)} onPick={handlePick} />
+      <RecipePicker
+        open={!!picker}
+        slot={picker}
+        current={picker ? getSlot(picker.date, picker.meal) : null}
+        plannedIds={plannedIds}
+        onClose={() => setPicker(null)}
+        onPick={handlePick}
+        onRemove={remove}
+        onOpenRecipe={openFromPicker}
+      />
 
       {toast && (
         <div className="toast" role="status">
