@@ -5,7 +5,8 @@ import RecipeLibrary from "./components/RecipeLibrary";
 import RecipeDetail from "./components/RecipeDetail";
 import RecipePicker from "./components/RecipePicker";
 import ShoppingList from "./components/ShoppingList";
-import { useLocalStorage } from "./hooks/useLocalStorage";
+import SyncSheet, { statusLabel } from "./components/SyncSheet";
+import { useHousehold } from "./hooks/useHousehold";
 import { PLAN_MEALS, getRecipe, randomRecipe } from "./lib/recipes";
 import { startOfWeek, weekDays, toISODate, weekdayShort } from "./lib/dates";
 import { DEFAULT_ROUTINE, resolveSlot, dowOf, dowName } from "./lib/plan";
@@ -19,10 +20,14 @@ const VIEWS = [
 export default function App() {
   const [view, setView] = useState("plan");
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
-  const [plan, setPlan] = useLocalStorage("meals.plan.v1", {});
-  const [checked, setChecked] = useLocalStorage("meals.checked.v1", {});
-  const [extras, setExtras] = useLocalStorage("meals.extras.v1", {});
-  const [routine, setRoutine] = useLocalStorage("meals.routine.v3", DEFAULT_ROUTINE);
+  const household = useHousehold({ plan: {}, routine: DEFAULT_ROUTINE, checked: {}, extras: {} });
+  const { plan, routine, checked, extras } = household.data;
+  const { update } = household;
+  const setPlan = useCallback((v) => update("plan", v), [update]);
+  const setRoutine = useCallback((v) => update("routine", v), [update]);
+  const setChecked = useCallback((v) => update("checked", v), [update]);
+  const setExtras = useCallback((v) => update("extras", v), [update]);
+  const [syncOpen, setSyncOpen] = useState(false);
 
   const getSlot = useCallback((dateKey, meal) => resolveSlot(plan, routine, dateKey, meal), [plan, routine]);
 
@@ -177,8 +182,19 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand">
-          Meals <span>&amp; Recipes</span>
+        <div className="brand-row">
+          <div className="brand">
+            Meals <span>&amp; Recipes</span>
+          </div>
+          <button
+            className={`sync-pill ${household.status}`}
+            onClick={() => setSyncOpen(true)}
+            title={statusLabel(household.status)}
+            aria-label={`Sync: ${statusLabel(household.status)}`}
+          >
+            <span className="dot" aria-hidden="true" />
+            {household.code ? "Shared" : "Sync"}
+          </button>
         </div>
         <nav className="tabs" aria-label="Sections">
           {VIEWS.map((v) => (
@@ -238,6 +254,15 @@ export default function App() {
           setDetail(null);
           setPicker(slot);
         }}
+      />
+      <SyncSheet
+        open={syncOpen}
+        onClose={() => setSyncOpen(false)}
+        code={household.code}
+        status={household.status}
+        onJoin={household.join}
+        onLeave={household.leave}
+        onToast={setToast}
       />
       <RecipePicker open={!!picker} slot={picker} plannedIds={plannedIds} onClose={() => setPicker(null)} onPick={handlePick} />
 
