@@ -59,8 +59,8 @@ export default function RecipePicker({ open, slot, plannedIds, onClose, onPick }
         <button className="chip" aria-pressed={!onlyThisMeal} onClick={() => setOnlyThisMeal((v) => !v)}>
           {onlyThisMeal ? `Only ${slot.meal.toLowerCase()} recipes` : "All recipes"}
         </button>
+        <TagFilter selected={tags} onChange={setTags} />
       </div>
-      <TagFilter selected={tags} onChange={setTags} />
 
       {query.trim() && (
         <button className="row note-row" onClick={() => onPick(slot, noteId(query))}>

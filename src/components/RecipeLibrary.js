@@ -51,8 +51,8 @@ export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe }) {
             </button>
           ))}
         </div>
+        <TagFilter selected={tags} onChange={setTags} />
       </div>
-      <TagFilter selected={tags} onChange={setTags} />
 
       {visible.length === 0 ? (
         <div className="empty">

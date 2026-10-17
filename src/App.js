@@ -17,7 +17,7 @@ const VIEWS = [
 ];
 
 export default function App() {
-  const [view, setView] = useState("plan");
+  const [view, setView] = useState("recipes");
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [plan, setPlan] = useLocalStorage("meals.plan.v1", {});
   const [checked, setChecked] = useLocalStorage("meals.checked.v1", {});
