@@ -161,7 +161,7 @@ export const recipes: Recipe[] = [
     instructions: "SJ",
   },
   {
-    meal: "All",
+    meal: "Breakfast",
     mealName: "Smoothie",
     ingredient:
       "Banana\nBlueberries\nFrozen spinach\nApplesauce\nPeanut butter\nLittle bit of water ",
@@ -256,7 +256,7 @@ export const recipes: Recipe[] = [
     instructions: "tbd",
   },
   {
-    meal: "All",
+    meal: "Lunch",
     mealName: "Potato Salad",
     ingredient:
       "5 pounds red potatoes, chopped, 3 cups mayonnaise, 2 cups finely chopped pickles, 5 large hard-cooked eggs, chopped, ½ cup chopped red onion,½ cup chopped celery, 3 tablespoons prepared mustard, 1 tablespoon apple cider vinegar,1 teaspoon salt, or to taste,  ½ teaspoon ground black pepper",
