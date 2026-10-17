@@ -3,6 +3,8 @@ import { recipes as rawRecipes } from "../recipes";
 export const MEALS = ["Breakfast", "Lunch", "Dinner"];
 // The plan only covers dinner. Breakfast and lunch recipes stay in the book for reading.
 export const PLAN_MEALS = ["Dinner"];
+// Display order for tag filters.
+export const TAGS = ["Kids", "Quick", "Italian", "Puerto Rican", "Grill", "Cold weather", "Summer"];
 
 const EMPTY_VALUES = new Set(["", "tbd", "n/a", "na", "sj", "none", "-"]);
 const URL_RE = /(https?:\/\/[^\s)]+)/g;
@@ -42,6 +44,8 @@ function splitSteps(text) {
     .map((l) => l.trim())
     .filter(Boolean)
     .filter((l) => !/^step\s*\d+$/i.test(l))
+    // A bare link is a source, not a step.
+    .filter((l) => !/^https?:\/\/\S+$/.test(l))
     .map((l) => l.replace(/^(step\s*\d+[:.)]?\s*|\d+[.)]\s*)/i, "").trim())
     .filter(Boolean);
 }
@@ -62,6 +66,7 @@ function normalise(raw) {
     ingredients,
     steps,
     links,
+    tags: raw.tags || [],
     // A recipe with only a link still counts as written.
     hasRecipe: ingredients.length > 0 || steps.length > 0,
   };
@@ -99,6 +104,11 @@ export function getRecipe(id) {
 
 export function fitsMeal(recipe, meal) {
   return !meal || recipe.meal === meal || recipe.meal === "Any";
+}
+
+export function filterByTags(list, tags) {
+  if (!tags || tags.length === 0) return list;
+  return list.filter((r) => tags.every((t) => r.tags.includes(t)));
 }
 
 export function searchRecipes(list, query) {

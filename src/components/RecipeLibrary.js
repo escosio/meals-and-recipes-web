@@ -1,18 +1,20 @@
 import { useMemo, useState } from "react";
-import { recipes, searchRecipes, recipeSummary, MEALS } from "../lib/recipes";
+import { recipes, searchRecipes, filterByTags, recipeSummary, MEALS } from "../lib/recipes";
+import TagFilter from "./TagFilter";
 
 const FILTERS = ["All", ...MEALS, ...(recipes.some((r) => r.meal === "Any") ? ["Any time"] : [])];
 
 export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
+  const [tags, setTags] = useState([]);
 
   const visible = useMemo(() => {
     let list = recipes;
     if (filter === "Any time") list = list.filter((r) => r.meal === "Any");
     else if (filter !== "All") list = list.filter((r) => r.meal === filter || r.meal === "Any");
-    return searchRecipes(list, query);
-  }, [query, filter]);
+    return searchRecipes(filterByTags(list, tags), query);
+  }, [query, filter, tags]);
 
   const grouped = useMemo(() => {
     if (filter !== "All") return [[null, visible]];
@@ -50,11 +52,12 @@ export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe }) {
           ))}
         </div>
       </div>
+      <TagFilter selected={tags} onChange={setTags} />
 
       {visible.length === 0 ? (
         <div className="empty">
           <strong>No recipes match</strong>
-          Try a different word, or clear the meal filter.
+          Try a different word, or clear a filter.
         </div>
       ) : (
         grouped.map(([label, list]) => (
@@ -72,6 +75,9 @@ export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe }) {
                       </div>
                       <div className="meta">
                         {planned && <span className="pill gold">{planned.join(", ")}</span>}
+                        {r.tags.slice(0, 2).map((t) => (
+                          <span key={t} className="pill muted tag-pill">{t}</span>
+                        ))}
                         {filter === "All" && r.meal === "Any" && <span className="pill muted">Any time</span>}
                       </div>
                     </button>

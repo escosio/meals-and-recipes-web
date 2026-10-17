@@ -1,30 +1,36 @@
 import { useEffect, useMemo, useState } from "react";
 import Sheet from "./Sheet";
-import { recipes, QUICK_OPTIONS, fitsMeal, searchRecipes, randomRecipe, recipeSummary, noteId } from "../lib/recipes";
+import { recipes, QUICK_OPTIONS, fitsMeal, searchRecipes, filterByTags, randomRecipe, recipeSummary, noteId } from "../lib/recipes";
+import TagFilter from "./TagFilter";
 import { weekdayLong } from "../lib/dates";
 
 export default function RecipePicker({ open, slot, plannedIds, onClose, onPick }) {
   const [query, setQuery] = useState("");
   const [onlyThisMeal, setOnlyThisMeal] = useState(true);
+  const [tags, setTags] = useState([]);
 
   useEffect(() => {
     if (open) {
       setQuery("");
       setOnlyThisMeal(true);
+      setTags([]);
     }
   }, [open, slot]);
 
   const list = useMemo(() => {
     if (!slot) return [];
     const base = onlyThisMeal ? recipes.filter((r) => fitsMeal(r, slot.meal)) : recipes;
-    return searchRecipes(base, query);
-  }, [slot, query, onlyThisMeal]);
+    return searchRecipes(filterByTags(base, tags), query);
+  }, [slot, query, onlyThisMeal, tags]);
 
   if (!slot) return <Sheet open={false} onClose={onClose} title="" />;
 
   const dayName = weekdayLong(new Date(slot.date + "T00:00"));
   const pickRandom = () => {
-    const r = randomRecipe(slot.meal, plannedIds);
+    // Respect the tag filter so "Pick for me" with Kids on picks a kid dinner.
+    const pool = list.filter((r) => r.hasRecipe && !plannedIds.has(r.id));
+    const from = pool.length ? pool : list;
+    const r = from.length ? from[Math.floor(Math.random() * from.length)] : randomRecipe(slot.meal, plannedIds);
     if (r) onPick(slot, r.id);
   };
 
@@ -54,6 +60,7 @@ export default function RecipePicker({ open, slot, plannedIds, onClose, onPick }
           {onlyThisMeal ? `Only ${slot.meal.toLowerCase()} recipes` : "All recipes"}
         </button>
       </div>
+      <TagFilter selected={tags} onChange={setTags} />
 
       {query.trim() && (
         <button className="row note-row" onClick={() => onPick(slot, noteId(query))}>
