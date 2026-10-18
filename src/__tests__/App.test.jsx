@@ -227,10 +227,35 @@ describe("adding to the plan", () => {
     fireEvent.click(screen.getByRole("button", { name: /^Hot Dogs/ }));
     const detail = openSheet("Hot Dogs");
     fireEvent.click(detail.getByRole("button", { name: "Add to a dinner this week" }));
-    fireEvent.click(detail.getAllByRole("button", { name: "Add here" })[0]);
+    fireEvent.click(detail.getAllByRole("button", { name: /^Dinner/ })[0]);
 
     expect(screen.getByRole("heading", { name: /week|–/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /dinner: Hot Dogs/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /dinner: .*Hot Dogs/ })).toBeInTheDocument();
+  });
+
+  test("lunch can be added to a day from the picker and shows under the dinner", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    goTo("Plan");
+
+    // No day has a lunch until one is added.
+    expect(screen.getByRole("button", { name: /^Friday dinner: Takeout/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: / lunch: / })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^Monday dinner/ }));
+    const picker = openSheet("Monday dinner");
+    fireEvent.click(picker.getByRole("tab", { name: "Lunch" }));
+    expect(screen.getByRole("heading", { name: "Monday lunch" })).toBeInTheDocument();
+    const lunchPicker = openSheet("Monday lunch");
+    await user.type(lunchPicker.getByRole("searchbox"), "escarole");
+    fireEvent.click(lunchPicker.getByRole("button", { name: /^Escarole Soup/ }));
+
+    expect(screen.getByRole("button", { name: /^Monday lunch: Escarole Soup/ })).toBeInTheDocument();
+    // Dinner count is unaffected by lunches.
+    expect(screen.getByText(/of 7 dinners planned/)).toBeInTheDocument();
+
+    goTo("Shop");
+    expect(screen.getByRole("heading", { name: /^Escarole Soup/ })).toBeInTheDocument();
   });
 
   test("the plan is still there after a reload", async () => {

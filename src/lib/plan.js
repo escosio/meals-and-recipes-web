@@ -14,7 +14,7 @@ export function dowName(dow) {
 // Things you make every week, keyed by weekday then meal.
 export const DEFAULT_ROUTINE = {
   0: { Dinner: "note:Leftover meatballs" }, // Monday
-  4: { Dinner: "note:Pizza or McDonald's" }, // Friday
+  4: { Dinner: "note:takeout" }, // Friday
   6: { Dinner: "meatballs" }, // Sunday
 };
 

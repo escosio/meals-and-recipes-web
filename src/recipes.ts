@@ -357,6 +357,15 @@ export const recipes: Recipe[] = [
   },
   {
     meal: "Side",
+    mealName: "Caesar Salad",
+    tags: ["Quick", "Summer", "Italian"],
+    ingredient:
+      "1 head romaine lettuce, chopped\n1/2 cup Caesar dressing\n1/2 cup grated parmesan\n1 cup croutons (GF if needed)\nBlack pepper\nLemon wedge (optional)",
+    instructions:
+      "Wash and dry the romaine well, then chop it into bite-sized pieces.\nToss the lettuce with the dressing until lightly coated.\nAdd the parmesan and croutons, toss again, and finish with black pepper and a squeeze of lemon.",
+  },
+  {
+    meal: "Side",
     mealName: "Habichuelas",
     tags: ["Puerto Rican", "Quick"],
     ingredient:

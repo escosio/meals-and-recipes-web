@@ -147,22 +147,24 @@ function DayPicker({ recipe, weekStart, getSlot, onPick }) {
             <div className="dp-day">
               {weekdayShort(d)} <small>{d.getDate()}</small>
             </div>
-            {PLAN_MEALS.map((meal) => {
-              const current = getSlot(key, meal).ids.map(getRecipe).filter(Boolean);
-              const already = current.some((r) => r.id === recipe.id);
-              const fits = fitsMeal(recipe, meal);
-              return (
-                <button
-                  key={meal}
-                  className={`dp-slot${current.length ? " filled" : ""}`}
-                  onClick={() => onPick({ date: key, meal })}
-                  disabled={already}
-                  style={fits ? undefined : { opacity: 0.5 }}
-                >
-                  {already ? "Already planned" : current.length ? `Add with ${current.map((r) => r.name).join(", ")}` : "Add here"}
-                </button>
-              );
-            })}
+            <div className="dp-meals">
+              {PLAN_MEALS.filter((meal) => fitsMeal(recipe, meal) || meal === "Dinner").map((meal) => {
+                const current = getSlot(key, meal).ids.map(getRecipe).filter(Boolean);
+                const already = current.some((r) => r.id === recipe.id);
+                return (
+                  <button
+                    key={meal}
+                    className={`dp-slot${current.length ? " filled" : ""}`}
+                    onClick={() => onPick({ date: key, meal })}
+                    disabled={already}
+                    title={current.length ? `With ${current.map((r) => r.name).join(", ")}` : `Add to ${meal.toLowerCase()}`}
+                  >
+                    {already ? `On ${meal.toLowerCase()}` : current.length ? `${meal} + ` : meal}
+                    {!already && current.length > 0 && <span className="dp-with">{current.map((r) => r.name).join(", ")}</span>}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         );
       })}

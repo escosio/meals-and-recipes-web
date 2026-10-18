@@ -4,8 +4,10 @@ export const MEALS = ["Breakfast", "Lunch", "Dinner"];
 // Sides go with any dinner but never stand in for one.
 export const SIDE = "Side";
 export const FORM_MEALS = [...MEALS, SIDE];
-// The plan only covers dinner. Breakfast and lunch recipes stay in the book for reading.
-export const PLAN_MEALS = ["Dinner"];
+// Dinner is the meal we plan; lunch and breakfast can be added to a day when needed.
+export const PRIMARY_MEAL = "Dinner";
+export const EXTRA_MEALS = ["Lunch", "Breakfast"];
+export const PLAN_MEALS = [PRIMARY_MEAL, ...EXTRA_MEALS];
 // Display order for tag filters.
 export const TAGS = ["Kids", "Quick", "Italian", "Puerto Rican", "Grill", "Cold weather", "Summer"];
 

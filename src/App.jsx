@@ -8,7 +8,7 @@ import ShoppingList from "./components/ShoppingList";
 import RecipeForm from "./components/RecipeForm";
 import { RecipesProvider } from "./lib/RecipesContext";
 import { useLocalStorage } from "./hooks/useLocalStorage";
-import { PLAN_MEALS, buildLibrary, randomRecipe, newRecipeId } from "./lib/recipes";
+import { PLAN_MEALS, PRIMARY_MEAL, buildLibrary, randomRecipe, newRecipeId } from "./lib/recipes";
 import { startOfWeek, weekDays, toISODate, weekdayShort } from "./lib/dates";
 import { DEFAULT_ROUTINE, resolveSlot, toList, dowOf, dowName } from "./lib/plan";
 
@@ -24,7 +24,7 @@ export default function App() {
   const [plan, setPlan] = useLocalStorage("meals.plan.v1", {});
   const [checked, setChecked] = useLocalStorage("meals.checked.v1", {});
   const [extras, setExtras] = useLocalStorage("meals.extras.v1", {});
-  const [routine, setRoutine] = useLocalStorage("meals.routine.v3", DEFAULT_ROUTINE);
+  const [routine, setRoutine] = useLocalStorage("meals.routine.v6", DEFAULT_ROUTINE);
   // Recipes added in the app, stored raw so they can be synced later.
   const [customRecipes, setCustomRecipes] = useLocalStorage("meals.recipes.v1", []);
   const [favoriteIds, setFavoriteIds] = useLocalStorage("meals.favorites.v1", []);
@@ -128,7 +128,8 @@ export default function App() {
   const handlePick = (slot, recipeId) => {
     assign(slot, recipeId);
     setPicker(null);
-    setToast(`${getRecipe(recipeId).name} added to ${weekdayShort(new Date(slot.date + "T00:00"))}`);
+    const day = weekdayShort(new Date(slot.date + "T00:00"));
+    setToast(`${getRecipe(recipeId).name} added to ${day}${slot.meal === PRIMARY_MEAL ? "" : ` ${slot.meal.toLowerCase()}`}`);
   };
 
   const handleAssignFromDetail = (slot, recipeId) => {
@@ -144,11 +145,11 @@ export default function App() {
       const next = { ...p };
       for (const d of weekDays(weekStart)) {
         const key = toISODate(d);
-        if (resolveSlot(next, routine, key, "Dinner").ids.length) continue;
-        const r = randomRecipe(recipes, "Dinner", used);
+        if (resolveSlot(next, routine, key, PRIMARY_MEAL).ids.length) continue;
+        const r = randomRecipe(recipes, PRIMARY_MEAL, used);
         if (!r) break;
         used.add(r.id);
-        next[key] = { ...(next[key] || {}), Dinner: [r.id] };
+        next[key] = { ...(next[key] || {}), [PRIMARY_MEAL]: [r.id] };
       }
       return next;
     });
@@ -299,10 +300,18 @@ export default function App() {
       <RecipePicker
         open={!!picker}
         slot={picker}
-        current={picker ? getSlot(picker.date, picker.meal) : null}
+        current={
+          picker
+            ? {
+                ...getSlot(picker.date, picker.meal),
+                others: Object.fromEntries(PLAN_MEALS.map((m) => [m, getSlot(picker.date, m).ids.length])),
+              }
+            : null
+        }
         plannedIds={plannedIds}
         favorites={favorites}
         onClose={() => setPicker(null)}
+        onChangeMeal={(meal) => setPicker((p) => (p ? { ...p, meal } : p))}
         onPick={handlePick}
         onRemove={remove}
         onReorder={reorder}

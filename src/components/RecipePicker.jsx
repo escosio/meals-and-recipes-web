@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Sheet from "./Sheet";
-import { QUICK_OPTIONS, SIDE, fitsMeal, searchRecipes, filterByTags, splitFavorites, randomRecipe, recipeSummary, noteId, mealLabel } from "../lib/recipes";
+import { QUICK_OPTIONS, SIDE, PLAN_MEALS, PRIMARY_MEAL, fitsMeal, isMainFor, searchRecipes, filterByTags, splitFavorites, randomRecipe, recipeSummary, noteId, mealLabel } from "../lib/recipes";
 import { useRecipes } from "../lib/RecipesContext";
 import TagFilter from "./TagFilter";
 import { weekdayLong } from "../lib/dates";
 
-export default function RecipePicker({ open, slot, current, plannedIds, favorites, onClose, onPick, onRemove, onReorder, onOpenRecipe }) {
+export default function RecipePicker({ open, slot, current, plannedIds, favorites, onClose, onChangeMeal, onPick, onRemove, onReorder, onOpenRecipe }) {
   const { recipes, getRecipe } = useRecipes();
   const [query, setQuery] = useState("");
   const [onlyThisMeal, setOnlyThisMeal] = useState(true);
@@ -15,6 +15,8 @@ export default function RecipePicker({ open, slot, current, plannedIds, favorite
   const [over, setOver] = useState(null); // id being hovered
   const dragId = useRef(null);
 
+  // Reset the search when the sheet opens or the meal changes, but not on every re-render of the slot.
+  const slotKey = slot ? `${slot.date}:${slot.meal}` : "";
   useEffect(() => {
     if (open) {
       setQuery("");
@@ -22,7 +24,7 @@ export default function RecipePicker({ open, slot, current, plannedIds, favorite
       setSidesOnly(false);
       setTags([]);
     }
-  }, [open, slot]);
+  }, [open, slotKey]);
 
   const list = useMemo(() => {
     if (!slot) return [];
@@ -59,7 +61,7 @@ export default function RecipePicker({ open, slot, current, plannedIds, favorite
   };
   const pickRandom = () => {
     // Respect the tag filter so "Pick for me" with Kids on picks a kid dinner.
-    const pool = list.filter((r) => r.meal !== SIDE && r.hasRecipe && !plannedIds.has(r.id));
+    const pool = list.filter((r) => isMainFor(r, slot.meal) && r.hasRecipe && !plannedIds.has(r.id));
     const from = pool.length ? pool : list;
     const r = from.length ? from[Math.floor(Math.random() * from.length)] : randomRecipe(recipes, slot.meal, plannedIds);
     if (r) onPick(slot, r.id);
@@ -98,6 +100,20 @@ export default function RecipePicker({ open, slot, current, plannedIds, favorite
       title={`${dayName} ${slot.meal.toLowerCase()}`}
       subtitle={tonight.length ? "Tap a dish to read it, or add another" : "Choose what to make"}
     >
+      <div className="meal-switch" role="tablist" aria-label="Meal">
+        {PLAN_MEALS.map((m) => (
+          <button
+            key={m}
+            role="tab"
+            className="meal-tab"
+            aria-selected={slot.meal === m}
+            onClick={() => onChangeMeal(m)}
+          >
+            {m}
+            {m !== PRIMARY_MEAL && current?.others?.[m] > 0 && <span className="count">{current.others[m]}</span>}
+          </button>
+        ))}
+      </div>
       {tonight.length > 0 && (
         <ul className="tonight" aria-label="Already planned">
           {tonight.map((r, i) => (

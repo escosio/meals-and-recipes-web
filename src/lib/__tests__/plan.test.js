@@ -31,7 +31,7 @@ describe("the family routine", () => {
   test("Sunday is meatballs, Monday leftovers, Friday takeout", () => {
     expect(toList(DEFAULT_ROUTINE[6].Dinner)).toEqual(["meatballs"]);
     expect(toList(DEFAULT_ROUTINE[0].Dinner)[0]).toMatch(/^note:Leftover/);
-    expect(toList(DEFAULT_ROUTINE[4].Dinner)[0]).toMatch(/^note:Pizza/);
+    expect(toList(DEFAULT_ROUTINE[4].Dinner)).toEqual(["note:takeout"]);
     expect(DEFAULT_ROUTINE[4].Lunch).toBeUndefined();
   });
 });

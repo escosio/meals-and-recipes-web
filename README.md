@@ -2,7 +2,7 @@
 
 A weekly meal planner built around our family recipe book.
 
-- **Plan** – one dinner per night, Monday to Sunday. Tap a night to pick a recipe, write a note ("Pizza or McDonald's"), or let the app pick for you. Meals you make every week (Sunday meatballs, Friday takeout) repeat automatically and can be overridden for a single week.
+- **Plan** – one dinner per night, Monday to Sunday, with lunch and breakfast available per day when you need them. Tap a night to pick a recipe, write a note ("Takeout"), or let the app pick for you. A night can hold several dishes, including sides. Meals you make every week (Sunday meatballs, Friday takeout) repeat automatically and can be overridden for a single week. Star recipes to keep them in a Favorites section.
 - **Recipes** – search by name or ingredient, filter by meal, and add any recipe straight to a day.
 - **Shop** – a shopping list built from the week's planned meals, grouped by recipe, with check-off, extra items, and copy-to-clipboard.
 

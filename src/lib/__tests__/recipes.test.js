@@ -36,8 +36,9 @@ describe("built-in recipe data", () => {
     });
   });
 
-  test("the plan only covers dinner", () => {
-    expect(PLAN_MEALS).toEqual(["Dinner"]);
+  test("dinner comes first in the plan, lunch and breakfast are optional extras", () => {
+    expect(PLAN_MEALS[0]).toBe("Dinner");
+    expect(PLAN_MEALS).toEqual(expect.arrayContaining(["Lunch", "Breakfast"]));
   });
 
   test("sides can go on a dinner but never stand in as the main", () => {

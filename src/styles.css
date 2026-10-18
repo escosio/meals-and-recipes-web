@@ -345,6 +345,22 @@ a {
   opacity: 0.72;
 }
 
+.daycard {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color 120ms ease;
+}
+
+.daycard:hover,
+.daycard:focus-within {
+  border-color: var(--green);
+}
+
 .slot {
   display: flex;
   flex-direction: column;
@@ -352,12 +368,10 @@ a {
   flex: 1;
   width: 100%;
   text-align: left;
-  border-radius: var(--r-md);
   padding: 12px 12px 10px;
   min-height: 132px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  transition: border-color 120ms ease, background 120ms ease;
+  background: transparent;
+  transition: background 120ms ease;
 }
 
 .slot .items {
@@ -399,20 +413,58 @@ a {
   color: var(--muted);
 }
 
-.slot.vacant {
+.daycard.vacant {
   border-style: dashed;
   background: transparent;
+}
+
+.daycard.vacant .slot {
   justify-content: flex-start;
 }
 
-.slot.vacant .name {
+.daycard.vacant .name {
   color: var(--muted);
   font-weight: 500;
   font-size: 16px;
 }
 
+/* Lunch and breakfast, shown only on days that have them */
+.extras {
+  border-top: 1px dashed var(--line);
+  display: flex;
+  flex-direction: column;
+}
+
+.extra {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  text-align: left;
+  padding: 7px 12px;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.extra + .extra {
+  border-top: 1px dashed var(--line);
+}
+
+.extra:hover {
+  background: var(--green-soft);
+}
+
+.extra-meal {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.extra-name {
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
 .slot:hover {
-  border-color: var(--green);
   background: var(--green-soft);
 }
 
@@ -447,6 +499,15 @@ a {
     min-height: 68px;
     padding: 10px 12px;
     justify-content: center;
+  }
+  .extra {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 12px;
+  }
+  .extra-meal {
+    min-width: 64px;
   }
   .slot .name {
     font-size: 17px;
@@ -951,6 +1012,26 @@ a {
   align-items: center;
 }
 
+.dp-meals {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dp-meals .dp-slot {
+  flex: 1;
+  min-width: 0;
+}
+
+.dp-with {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .day-picker .dp-day {
   font-weight: 600;
   font-size: 14px;
@@ -1034,6 +1115,44 @@ a {
 }
 
 /* ---------- Picker ---------- */
+.meal-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  margin-bottom: 14px;
+}
+
+.meal-tab {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+.meal-tab[aria-selected="true"] {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.meal-tab .count {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green-ink);
+  background: var(--green-soft);
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+
+.meal-tab[aria-selected="true"] .count {
+  background: rgba(255, 255, 255, 0.2);
+  color: inherit;
+}
+
 .tonight {
   list-style: none;
   margin: 0 0 14px;
