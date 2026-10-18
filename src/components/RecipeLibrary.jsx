@@ -1,10 +1,14 @@
 import { useMemo, useState } from "react";
-import { recipes, searchRecipes, filterByTags, recipeSummary, MEALS } from "../lib/recipes";
+import { searchRecipes, filterByTags, recipeSummary, MEALS, SIDE } from "../lib/recipes";
+import { useRecipes } from "../lib/RecipesContext";
 import TagFilter from "./TagFilter";
 
-const FILTERS = ["All", ...MEALS, ...(recipes.some((r) => r.meal === "Any") ? ["Any time"] : [])];
-
-export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe }) {
+export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe, onAddRecipe }) {
+  const { recipes } = useRecipes();
+  const FILTERS = useMemo(
+    () => ["All", ...MEALS, "Sides", ...(recipes.some((r) => r.meal === "Any") ? ["Any time"] : [])],
+    [recipes],
+  );
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
   const [tags, setTags] = useState([]);
@@ -12,15 +16,17 @@ export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe }) {
   const visible = useMemo(() => {
     let list = recipes;
     if (filter === "Any time") list = list.filter((r) => r.meal === "Any");
+    else if (filter === "Sides") list = list.filter((r) => r.meal === SIDE);
     else if (filter !== "All") list = list.filter((r) => r.meal === filter || r.meal === "Any");
     return searchRecipes(filterByTags(list, tags), query);
-  }, [query, filter, tags]);
+  }, [query, filter, tags, recipes]);
 
   const grouped = useMemo(() => {
     if (filter !== "All") return [[null, visible]];
-    const order = ["Breakfast", "Lunch", "Dinner", "Any"];
+    const order = ["Breakfast", "Lunch", "Dinner", SIDE, "Any"];
+    const labels = { Any: "Any time", [SIDE]: "Sides" };
     return order
-      .map((m) => [m === "Any" ? "Any time" : m, visible.filter((r) => r.meal === m)])
+      .map((m) => [labels[m] || m, visible.filter((r) => r.meal === m)])
       .filter(([, list]) => list.length);
   }, [visible, filter]);
 
@@ -28,6 +34,11 @@ export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe }) {
     <section aria-labelledby="recipes-title">
       <header className="weeknav">
         <h1 id="recipes-title">Recipes</h1>
+        <div className="controls">
+          <button className="btn primary" onClick={onAddRecipe}>
+            Add recipe
+          </button>
+        </div>
       </header>
 
       <div className="toolbar">
@@ -73,6 +84,7 @@ export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe }) {
                       </div>
                       <div className="meta">
                         {planned && <span className="pill gold">{planned.join(", ")}</span>}
+                        {r.custom && <span className="pill">Yours</span>}
                         {r.tags.slice(0, 2).map((t) => (
                           <span key={t} className="pill muted tag-pill">{t}</span>
                         ))}

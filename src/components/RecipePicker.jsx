@@ -1,27 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
 import Sheet from "./Sheet";
-import { recipes, QUICK_OPTIONS, fitsMeal, searchRecipes, filterByTags, randomRecipe, recipeSummary, noteId, getRecipe } from "../lib/recipes";
+import { QUICK_OPTIONS, SIDE, fitsMeal, searchRecipes, filterByTags, randomRecipe, recipeSummary, noteId, mealLabel } from "../lib/recipes";
+import { useRecipes } from "../lib/RecipesContext";
 import TagFilter from "./TagFilter";
 import { weekdayLong } from "../lib/dates";
 
 export default function RecipePicker({ open, slot, current, plannedIds, onClose, onPick, onRemove, onOpenRecipe }) {
+  const { recipes, getRecipe } = useRecipes();
   const [query, setQuery] = useState("");
   const [onlyThisMeal, setOnlyThisMeal] = useState(true);
+  const [sidesOnly, setSidesOnly] = useState(false);
   const [tags, setTags] = useState([]);
 
   useEffect(() => {
     if (open) {
       setQuery("");
       setOnlyThisMeal(true);
+      setSidesOnly(false);
       setTags([]);
     }
   }, [open, slot]);
 
   const list = useMemo(() => {
     if (!slot) return [];
-    const base = onlyThisMeal ? recipes.filter((r) => fitsMeal(r, slot.meal)) : recipes;
+    let base = onlyThisMeal ? recipes.filter((r) => fitsMeal(r, slot.meal)) : recipes;
+    if (sidesOnly) base = base.filter((r) => r.meal === SIDE);
     return searchRecipes(filterByTags(base, tags), query);
-  }, [slot, query, onlyThisMeal, tags]);
+  }, [slot, query, onlyThisMeal, sidesOnly, tags, recipes]);
 
   if (!slot) return <Sheet open={false} onClose={onClose} title="" />;
 
@@ -30,9 +35,9 @@ export default function RecipePicker({ open, slot, current, plannedIds, onClose,
   const onSlot = new Set(tonight.map((r) => r.id));
   const pickRandom = () => {
     // Respect the tag filter so "Pick for me" with Kids on picks a kid dinner.
-    const pool = list.filter((r) => r.hasRecipe && !plannedIds.has(r.id));
+    const pool = list.filter((r) => r.meal !== SIDE && r.hasRecipe && !plannedIds.has(r.id));
     const from = pool.length ? pool : list;
-    const r = from.length ? from[Math.floor(Math.random() * from.length)] : randomRecipe(slot.meal, plannedIds);
+    const r = from.length ? from[Math.floor(Math.random() * from.length)] : randomRecipe(recipes, slot.meal, plannedIds);
     if (r) onPick(slot, r.id);
   };
 
@@ -77,6 +82,9 @@ export default function RecipePicker({ open, slot, current, plannedIds, onClose,
             {q.name}
           </button>
         ))}
+        <button className="chip" aria-pressed={sidesOnly} onClick={() => setSidesOnly((v) => !v)}>
+          Sides
+        </button>
         <button className="chip" aria-pressed={!onlyThisMeal} onClick={() => setOnlyThisMeal((v) => !v)}>
           {onlyThisMeal ? `Only ${slot.meal.toLowerCase()} recipes` : "All recipes"}
         </button>
@@ -111,7 +119,7 @@ export default function RecipePicker({ open, slot, current, plannedIds, onClose,
                   ) : (
                     plannedIds.has(r.id) && <span className="pill gold">Planned</span>
                   )}
-                  {!onlyThisMeal && <span className="pill muted">{r.meal === "Any" ? "Any time" : r.meal}</span>}
+                  {(!onlyThisMeal || r.meal === SIDE) && !sidesOnly && <span className="pill muted">{mealLabel(r.meal)}</span>}
                 </div>
               </button>
             </li>

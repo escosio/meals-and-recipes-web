@@ -968,6 +968,45 @@ a {
   }
 }
 
+/* ---------- Recipe form ---------- */
+.recipe-form {
+  display: grid;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field > span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  font: inherit;
+  color: inherit;
+  line-height: 1.4;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--muted);
+}
+
 /* ---------- Picker ---------- */
 .tonight {
   list-style: none;

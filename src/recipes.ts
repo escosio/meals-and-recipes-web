@@ -6,7 +6,7 @@ type Recipe = {
   tags?: Tag[];
 };
 
-type mealType = "Breakfast" | "Lunch" | "Dinner" | "All";
+type mealType = "Breakfast" | "Lunch" | "Dinner" | "Side" | "All";
 
 export type Tag =
   | "Puerto Rican"
@@ -190,7 +190,7 @@ export const recipes: Recipe[] = [
     instructions: "Heat 2 tablespoons oil in a large skillet over high heat. Add half the green beans, season with salt and pepper, and cook without stirring until they start to brown, about 3 minutes. Toss and cook until tender, 3 to 4 minutes more, then move to a baking sheet. Repeat with 2 more tablespoons oil and the rest of the beans. Wipe out the skillet.\nAdd the remaining 2 tablespoons oil and the sausage over medium-high heat. Break up the meat and cook until lightly browned, 4 to 5 minutes. Remove with a slotted spoon and add to the beans.\nAdd the red onion, fennel and thyme to the skillet, season with salt, and cook until softened, 4 to 5 minutes.\nReturn the beans and sausage to the skillet and toss. Season with salt and pepper and serve.\nhttps://www.foodnetwork.com/recipes/food-network-kitchen/green-beans-with-sausage-and-fennel-5477812",
   },
   {
-    meal: "Breakfast",
+    meal: "Side",
     mealName: "Smoothie",
     tags: ["Summer", "Kids", "Quick"],
     ingredient:
@@ -297,7 +297,7 @@ export const recipes: Recipe[] = [
     instructions: "Cook the pasta in a large pot of salted water until al dente.\nMeanwhile, saute the chicken in olive oil over medium-high heat for 3-4 minutes, until the outside is no longer pink. It doesn't need to brown.\nStir in the pesto and cream and simmer about 5 minutes.\nDrain the pasta, toss it with the sauce in the skillet, and season with salt and pepper. Top with Parmesan.\nhttps://www.saltandlavender.com/chicken-pesto-pasta/",
   },
   {
-    meal: "Lunch",
+    meal: "Side",
     mealName: "Potato Salad",
     tags: ["Summer", "Grill"],
     ingredient:
@@ -320,6 +320,46 @@ export const recipes: Recipe[] = [
     ingredient: "1 tbsp olive oil\n1/2 large white onion, chopped\n3 cloves garlic, finely chopped\n2 tbsp tomato paste\n1 1/2 lb ground beef\n1 1/2 tbsp chili powder\n1 tsp dried oregano\n1 tsp ground cumin\n1/2 tsp paprika\n1/4 tsp cayenne pepper (optional)\nSalt and pepper\n1 (28-oz) can crushed tomatoes\n1 (15-oz) can kidney beans, drained\nShredded cheddar, sour cream and sliced scallions, for serving",
     instructions:
       "In a large pot over medium heat, heat the oil. Add the onion and cook, stirring occasionally, until softened and translucent, 6-8 minutes. Add the garlic and cook until fragrant, about 1 minute. Add the tomato paste, stirring to coat. Add the ground beef and cook, breaking it up, until no longer pink, about 7 minutes. Drain excess fat.\nAdd chili powder, oregano, cumin, paprika and cayenne; season generously with salt and pepper. Pour in the tomatoes and beans and bring to a boil. Reduce heat to medium and simmer, stirring occasionally, until the flavors meld and the liquid reduces slightly, about 20 minutes. Adjust salt and pepper.\nLadle into bowls and top with cheese, sour cream and scallions.\nhttps://www.delish.com/cooking/recipe-ideas/a58253/best-homemade-chili-recipe/",
+  },
+  {
+    meal: "Side",
+    mealName: "White Rice",
+    tags: ["Kids", "Quick"],
+    ingredient: "1 cup long-grain white rice\n2 cups water\n1 tbsp oil or butter\n1/2 tsp salt",
+    instructions:
+      "Rinse the rice until the water runs mostly clear.\nBring the water, oil and salt to a boil in a small pot.\nStir in the rice, cover, and turn the heat to low.\nCook 18 minutes without lifting the lid, then rest 5 minutes off the heat and fluff with a fork.",
+  },
+  {
+    meal: "Side",
+    mealName: "Buttered Spaghetti",
+    tags: ["Kids", "Quick", "Italian"],
+    ingredient: "8 oz spaghetti (GF if needed)\n2 tbsp butter\nGrated parmesan\nSalt",
+    instructions:
+      "Boil the spaghetti in salted water until al dente, about 1 minute less than the package says.\nDrain, saving a splash of pasta water.\nToss with the butter and a little pasta water until glossy. Top with parmesan.",
+  },
+  {
+    meal: "Side",
+    mealName: "Buttery Bread",
+    tags: ["Kids", "Quick", "Italian"],
+    ingredient: "1 loaf Italian bread (or GF rolls)\n4 tbsp butter, softened\n1 clove garlic, grated (optional)\nPinch of salt\nDried parsley",
+    instructions:
+      "Heat the oven to 400°F.\nSplit the bread lengthwise. Mix the butter with the garlic, salt and parsley and spread it on the cut sides.\nBake 8-10 minutes until the edges are golden. Slice and serve warm.",
+  },
+  {
+    meal: "Side",
+    mealName: "Roasted Potatoes",
+    tags: ["Kids", "Cold weather"],
+    ingredient: "1 1/2 lb small potatoes, halved\n2 tbsp olive oil\n1 tsp salt\n1/2 tsp garlic powder\nBlack pepper\nDried rosemary or adobo",
+    instructions:
+      "Heat the oven to 425°F.\nToss the potatoes with the oil, salt, garlic powder, pepper and herbs on a sheet pan. Spread them cut side down.\nRoast 25-30 minutes, flipping once, until crisp outside and tender inside.",
+  },
+  {
+    meal: "Side",
+    mealName: "Mashed Potatoes",
+    tags: ["Kids", "Cold weather"],
+    ingredient: "2 lb Yukon gold potatoes, peeled and cubed\n4 tbsp butter\n1/2 cup milk, warmed\n1 tsp salt\nBlack pepper",
+    instructions:
+      "Cover the potatoes with cold salted water and boil until a fork slides in easily, about 15 minutes.\nDrain well and return to the hot pot for a minute to dry out.\nMash with the butter, then stir in warm milk until smooth. Season with salt and pepper.",
   },
 ];
 

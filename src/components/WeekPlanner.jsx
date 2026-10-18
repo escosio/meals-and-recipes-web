@@ -1,4 +1,5 @@
-import { PLAN_MEALS, getRecipe } from "../lib/recipes";
+import { PLAN_MEALS } from "../lib/recipes";
+import { useRecipes } from "../lib/RecipesContext";
 import {
   weekDays,
   toISODate,
@@ -12,6 +13,7 @@ import {
 } from "../lib/dates";
 
 export default function WeekPlanner({ weekStart, onChangeWeek, getSlot, onOpenSlot, onFillEmpty, onClearWeek }) {
+  const { getRecipe } = useRecipes();
   const today = new Date();
   const days = weekDays(weekStart);
   const relative = relativeWeekLabel(weekStart);

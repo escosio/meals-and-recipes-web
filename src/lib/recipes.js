@@ -1,6 +1,9 @@
 import { recipes as rawRecipes } from "../recipes";
 
 export const MEALS = ["Breakfast", "Lunch", "Dinner"];
+// Sides go with any dinner but never stand in for one.
+export const SIDE = "Side";
+export const FORM_MEALS = [...MEALS, SIDE];
 // The plan only covers dinner. Breakfast and lunch recipes stay in the book for reading.
 export const PLAN_MEALS = ["Dinner"];
 // Display order for tag filters.
@@ -58,25 +61,22 @@ function normalise(raw) {
   const ingredients = splitIngredients(raw.ingredient);
   const steps = splitSteps(raw.instructions);
   const links = extractLinks(raw.instructions).concat(extractLinks(raw.ingredient));
+  if (raw.link && !links.includes(raw.link)) links.push(raw.link);
   const meal = raw.meal === "All" ? "Any" : raw.meal;
   return {
-    id: slugify(raw.mealName),
+    id: raw.id || slugify(raw.mealName),
     name: raw.mealName.trim(),
     meal,
     ingredients,
     steps,
     links,
     tags: raw.tags || [],
+    custom: !!raw.custom,
+    raw,
     // A recipe with only a link still counts as written.
-    hasRecipe: ingredients.length > 0 || steps.length > 0,
+    hasRecipe: ingredients.length > 0 || steps.length > 0 || links.length > 0,
   };
 }
-
-export const recipes = rawRecipes
-  .map(normalise)
-  .sort((a, b) => a.name.localeCompare(b.name));
-
-const byId = new Map(recipes.map((r) => [r.id, r]));
 
 // Quick non-recipe options you can put in a slot.
 export const QUICK_OPTIONS = [
@@ -84,26 +84,63 @@ export const QUICK_OPTIONS = [
   { id: "note:takeout", name: "Takeout", meal: "Any", isNote: true },
   { id: "note:eating-out", name: "Eating out", meal: "Any", isNote: true },
 ];
-QUICK_OPTIONS.forEach((q) => byId.set(q.id, q));
+
+const byName = (a, b) => a.name.localeCompare(b.name);
+
+/** Recipes that ship with the app. */
+export const builtInRecipes = rawRecipes.map(normalise).sort(byName);
+
+/**
+ * The full library: built-ins plus recipes added in the app. Custom recipes
+ * are stored raw (same shape as recipes.ts entries, plus id and custom: true)
+ * so they can be saved as plain JSON and later synced between phones.
+ */
+export function buildLibrary(customRaw = []) {
+  const custom = customRaw.map(normalise);
+  const recipes = [...builtInRecipes, ...custom].sort(byName);
+  const map = new Map(recipes.map((r) => [r.id, r]));
+  QUICK_OPTIONS.forEach((q) => map.set(q.id, q));
+  const getRecipe = (id) => {
+    if (!id) return null;
+    const known = map.get(id);
+    if (known) return known;
+    // Free-text notes typed into a slot, e.g. "note:McDonald's".
+    if (id.startsWith("note:")) {
+      const name = id.slice(5).trim();
+      return name ? { id, name, meal: "Any", isNote: true } : null;
+    }
+    return null;
+  };
+  return { recipes, getRecipe };
+}
+
+/** A unique id for a new custom recipe, avoiding clashes with existing ones. */
+export function newRecipeId(name, existing) {
+  const base = slugify(name) || "recipe";
+  const taken = new Set(existing.map((r) => r.id));
+  let id = base;
+  let n = 2;
+  while (taken.has(id)) id = `${base}-${n++}`;
+  return id;
+}
 
 export function noteId(text) {
   return `note:${text.trim()}`;
 }
 
-export function getRecipe(id) {
-  if (!id) return null;
-  const known = byId.get(id);
-  if (known) return known;
-  // Free-text notes typed into a slot, e.g. "note:McDonald's".
-  if (id.startsWith("note:")) {
-    const name = id.slice(5).trim();
-    return name ? { id, name, meal: "Any", isNote: true } : null;
-  }
-  return null;
+/** Can this recipe be put on a slot for `meal`? Sides and any-time recipes fit everywhere. */
+export function fitsMeal(recipe, meal) {
+  return !meal || recipe.meal === meal || recipe.meal === "Any" || recipe.meal === SIDE;
 }
 
-export function fitsMeal(recipe, meal) {
-  return !meal || recipe.meal === meal || recipe.meal === "Any";
+/** Can this recipe be the main dish for `meal`? Excludes sides. */
+export function isMainFor(recipe, meal) {
+  return fitsMeal(recipe, meal) && recipe.meal !== SIDE;
+}
+
+export function mealLabel(meal) {
+  if (meal === "Any") return "Any time";
+  return meal;
 }
 
 export function filterByTags(list, tags) {
@@ -121,11 +158,11 @@ export function searchRecipes(list, query) {
   );
 }
 
-export function randomRecipe(meal, exclude = new Set()) {
+export function randomRecipe(recipes, meal, exclude = new Set()) {
   const pool = recipes.filter(
-    (r) => fitsMeal(r, meal) && r.hasRecipe && !exclude.has(r.id),
+    (r) => isMainFor(r, meal) && r.hasRecipe && !exclude.has(r.id),
   );
-  const fallback = recipes.filter((r) => fitsMeal(r, meal));
+  const fallback = recipes.filter((r) => isMainFor(r, meal));
   const list = pool.length ? pool : fallback;
   if (!list.length) return null;
   return list[Math.floor(Math.random() * list.length)];

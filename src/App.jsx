@@ -5,8 +5,10 @@ import RecipeLibrary from "./components/RecipeLibrary";
 import RecipeDetail from "./components/RecipeDetail";
 import RecipePicker from "./components/RecipePicker";
 import ShoppingList from "./components/ShoppingList";
+import RecipeForm from "./components/RecipeForm";
+import { RecipesProvider } from "./lib/RecipesContext";
 import { useLocalStorage } from "./hooks/useLocalStorage";
-import { PLAN_MEALS, getRecipe, randomRecipe } from "./lib/recipes";
+import { PLAN_MEALS, buildLibrary, randomRecipe, newRecipeId } from "./lib/recipes";
 import { startOfWeek, weekDays, toISODate, weekdayShort } from "./lib/dates";
 import { DEFAULT_ROUTINE, resolveSlot, toList, dowOf, dowName } from "./lib/plan";
 
@@ -23,6 +25,11 @@ export default function App() {
   const [checked, setChecked] = useLocalStorage("meals.checked.v1", {});
   const [extras, setExtras] = useLocalStorage("meals.extras.v1", {});
   const [routine, setRoutine] = useLocalStorage("meals.routine.v3", DEFAULT_ROUTINE);
+  // Recipes added in the app, stored raw so they can be synced later.
+  const [customRecipes, setCustomRecipes] = useLocalStorage("meals.recipes.v1", []);
+  const library = useMemo(() => buildLibrary(customRecipes), [customRecipes]);
+  const { recipes, getRecipe } = library;
+  const [editing, setEditing] = useState(null); // null | "new" | raw recipe being edited
 
   const getSlot = useCallback((dateKey, meal) => resolveSlot(plan, routine, dateKey, meal), [plan, routine]);
 
@@ -129,7 +136,7 @@ export default function App() {
       for (const d of weekDays(weekStart)) {
         const key = toISODate(d);
         if (resolveSlot(next, routine, key, "Dinner").ids.length) continue;
-        const r = randomRecipe("Dinner", used);
+        const r = randomRecipe(recipes, "Dinner", used);
         if (!r) break;
         used.add(r.id);
         next[key] = { ...(next[key] || {}), Dinner: [r.id] };
@@ -171,14 +178,33 @@ export default function App() {
       if (r && !r.isNote) n += r.ingredients.length;
     }
     return n;
-  }, [plannedIds]);
+  }, [plannedIds, getRecipe]);
 
   const openFromPicker = (slot, recipeId) => {
     setPicker(null);
     setDetail({ recipeId, slot });
   };
 
+  const saveRecipe = (raw) => {
+    const isNew = !raw.id;
+    const entry = isNew ? { ...raw, id: newRecipeId(raw.mealName, recipes), custom: true } : { ...raw, custom: true };
+    setCustomRecipes((list) => (isNew ? [...list, entry] : list.map((r) => (r.id === entry.id ? entry : r))));
+    setEditing(null);
+    setToast(isNew ? `${entry.mealName} added to the book` : `${entry.mealName} saved`);
+    if (isNew) setDetail({ recipeId: entry.id });
+  };
+
+  const deleteRecipe = (id) => {
+    const r = getRecipe(id);
+    if (!window.confirm(`Delete ${r?.name || "this recipe"}? Nights that use it will show it as missing.`)) return;
+    setCustomRecipes((list) => list.filter((x) => x.id !== id));
+    setEditing(null);
+    setDetail(null);
+    setToast("Recipe deleted");
+  };
+
   return (
+    <RecipesProvider value={library}>
     <div className="app">
       <header className="topbar">
         <div className="brand">
@@ -206,7 +232,11 @@ export default function App() {
           />
         )}
         {view === "recipes" && (
-          <RecipeLibrary plannedThisWeek={plannedThisWeek} onOpenRecipe={(id) => setDetail({ recipeId: id })} />
+          <RecipeLibrary
+            plannedThisWeek={plannedThisWeek}
+            onOpenRecipe={(id) => setDetail({ recipeId: id })}
+            onAddRecipe={() => setEditing("new")}
+          />
         )}
         {view === "shop" && (
           <ShoppingList
@@ -242,6 +272,17 @@ export default function App() {
           setDetail(null);
           setPicker(slot);
         }}
+        onEdit={(recipe) => {
+          setDetail(null);
+          setEditing(recipe.raw);
+        }}
+      />
+      <RecipeForm
+        open={!!editing}
+        initial={editing === "new" ? null : editing}
+        onClose={() => setEditing(null)}
+        onSave={saveRecipe}
+        onDelete={deleteRecipe}
       />
       <RecipePicker
         open={!!picker}
@@ -260,5 +301,6 @@ export default function App() {
         </div>
       )}
     </div>
+    </RecipesProvider>
   );
 }

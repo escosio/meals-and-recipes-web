@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
-import { PLAN_MEALS, getRecipe } from "../lib/recipes";
+import { PLAN_MEALS } from "../lib/recipes";
+import { useRecipes } from "../lib/RecipesContext";
 import { weekDays, toISODate, weekdayShort, formatWeekRange, relativeWeekLabel, addDays, startOfWeek } from "../lib/dates";
 
 export default function ShoppingList({ weekStart, onChangeWeek, getSlot, checked, onToggle, extras, onAddExtra, onRemoveExtra, onClearChecked, onToast }) {
+  const { getRecipe } = useRecipes();
   const [text, setText] = useState("");
   const [hideDone, setHideDone] = useState(false);
   const weekKey = toISODate(weekStart);
@@ -23,7 +25,7 @@ export default function ShoppingList({ weekStart, onChangeWeek, getSlot, checked
       }
     }
     return Array.from(map.values());
-  }, [getSlot, weekStart]);
+  }, [getSlot, weekStart, getRecipe]);
 
   const weekChecked = checked[weekKey] || {};
   const weekExtras = extras[weekKey] || [];

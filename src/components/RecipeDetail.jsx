@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Sheet from "./Sheet";
-import { PLAN_MEALS, getRecipe, linkify, hostOf } from "../lib/recipes";
+import { PLAN_MEALS, fitsMeal, linkify, hostOf, mealLabel as labelFor } from "../lib/recipes";
+import { useRecipes } from "../lib/RecipesContext";
 import { weekDays, toISODate, weekdayShort } from "../lib/dates";
 import { dowOf, dowName, toList } from "../lib/plan";
 
@@ -16,7 +17,8 @@ function Text({ text }) {
   );
 }
 
-export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot, routine, onClose, onAssign, onRemove, onRepeat, onSwap }) {
+export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot, routine, onClose, onAssign, onRemove, onRepeat, onSwap, onEdit }) {
+  const { getRecipe } = useRecipes();
   const recipe = getRecipe(recipeId);
   const [checked, setChecked] = useState({});
   const [picking, setPicking] = useState(false);
@@ -26,7 +28,8 @@ export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot,
   const toggle = (i) => setChecked((c) => ({ ...c, [i]: !c[i] }));
   const repeats = slot ? toList(routine[dowOf(slot.date)]?.[slot.meal]).includes(recipe.id) : false;
   const dayLabel = slot ? dowName(dowOf(slot.date)) : "";
-  const subtitle = recipe.isNote ? "Not a recipe" : recipe.meal === "Any" ? "Any time" : recipe.meal;
+  const mealLabel = labelFor(recipe.meal);
+  const subtitle = recipe.isNote ? "Not a recipe" : recipe.custom ? `${mealLabel}. Added by you.` : mealLabel;
 
   const handleClose = () => {
     setChecked({});
@@ -49,6 +52,11 @@ export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot,
     </>
   ) : (
     <>
+      {recipe.custom && (
+        <button className="btn quiet" onClick={() => onEdit(recipe)}>
+          Edit
+        </button>
+      )}
       <span className="spacer" />
       <button className="btn primary" onClick={() => setPicking((p) => !p)}>
         {picking ? "Back to recipe" : "Add to a dinner this week"}
@@ -115,6 +123,7 @@ export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot,
 }
 
 function DayPicker({ recipe, weekStart, getSlot, onPick }) {
+  const { getRecipe } = useRecipes();
   const days = weekDays(weekStart);
   return (
     <div className="day-picker" role="group" aria-label="Choose a day and meal">
@@ -128,7 +137,7 @@ function DayPicker({ recipe, weekStart, getSlot, onPick }) {
             {PLAN_MEALS.map((meal) => {
               const current = getSlot(key, meal).ids.map(getRecipe).filter(Boolean);
               const already = current.some((r) => r.id === recipe.id);
-              const fits = recipe.meal === "Any" || recipe.meal === meal;
+              const fits = fitsMeal(recipe, meal);
               return (
                 <button
                   key={meal}
