@@ -39,7 +39,7 @@ describe("the family routine", () => {
 describe("resolveSlot", () => {
   test("falls back to the routine when the week has no entry", () => {
     const slot = resolveSlot({}, DEFAULT_ROUTINE, SUN, "Dinner");
-    expect(slot).toEqual({ ids: ["meatballs"], routineIds: ["meatballs"], explicit: false });
+    expect(slot).toEqual({ ids: ["meatballs"], routineIds: ["meatballs"] });
   });
 
   test("an explicit entry overrides the routine for that week", () => {
@@ -47,7 +47,6 @@ describe("resolveSlot", () => {
     const slot = resolveSlot(plan, DEFAULT_ROUTINE, SUN, "Dinner");
     expect(slot.ids).toEqual(["tacos"]);
     expect(slot.routineIds).toEqual([]);
-    expect(slot.explicit).toBe(true);
   });
 
   test("an explicit empty list clears a routine night for one week only", () => {
@@ -72,6 +71,6 @@ describe("resolveSlot", () => {
   });
 
   test("a night with nothing anywhere is empty", () => {
-    expect(resolveSlot({}, {}, MON, "Dinner")).toEqual({ ids: [], routineIds: [], explicit: false });
+    expect(resolveSlot({}, {}, MON, "Dinner")).toEqual({ ids: [], routineIds: [] });
   });
 });

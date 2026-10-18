@@ -1,16 +1,7 @@
 import { PRIMARY_MEAL, EXTRA_MEALS } from "../lib/recipes";
 import { useRecipes } from "../lib/RecipesContext";
-import {
-  weekDays,
-  toISODate,
-  isSameDay,
-  weekdayShort,
-  weekdayLong,
-  formatWeekRange,
-  relativeWeekLabel,
-  startOfWeek,
-  addDays,
-} from "../lib/dates";
+import WeekNav from "./WeekNav";
+import { weekDays, toISODate, isSameDay, weekdayShort, weekdayLong, formatWeekRange, relativeWeekLabel } from "../lib/dates";
 
 export default function WeekPlanner({ weekStart, onChangeWeek, getSlot, onOpenSlot, onFillEmpty, onClearWeek }) {
   const { getRecipe } = useRecipes();
@@ -22,26 +13,13 @@ export default function WeekPlanner({ weekStart, onChangeWeek, getSlot, onOpenSl
 
   return (
     <section aria-labelledby="plan-title">
-      <header className="weeknav">
-        <div>
-          <h1 id="plan-title">{relative || formatWeekRange(weekStart)}</h1>
-          <p className="sub">
-            {relative ? `${formatWeekRange(weekStart)}. ` : ""}
-            {filled === 0 ? "No dinners planned yet." : `${filled} of 7 dinners planned.`}
-          </p>
-        </div>
-        <div className="controls">
-          <button className="btn icon" onClick={() => onChangeWeek(addDays(weekStart, -7))} aria-label="Previous week">
-            ‹
-          </button>
-          <button className="btn" onClick={() => onChangeWeek(startOfWeek(new Date()))} disabled={relative === "This week"}>
-            Today
-          </button>
-          <button className="btn icon" onClick={() => onChangeWeek(addDays(weekStart, 7))} aria-label="Next week">
-            ›
-          </button>
-        </div>
-      </header>
+      <WeekNav
+        id="plan-title"
+        title={relative || formatWeekRange(weekStart)}
+        sub={`${relative ? `${formatWeekRange(weekStart)}. ` : ""}${filled === 0 ? "No dinners planned yet." : `${filled} of 7 dinners planned.`}`}
+        weekStart={weekStart}
+        onChangeWeek={onChangeWeek}
+      />
 
       <div className="week">
         {days.map((d) => {

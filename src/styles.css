@@ -94,15 +94,6 @@ a {
   text-underline-offset: 2px;
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
 /* ---------- Shell ---------- */
 .app {
   min-height: 100vh;
@@ -1293,8 +1284,23 @@ a {
   transition: width 200ms ease;
 }
 
+.shop-summary .hint {
+  color: var(--muted);
+  font-size: 14px;
+}
+
 .shop-group {
   margin-bottom: 22px;
+}
+
+.checklist .spacer {
+  flex: 1;
+}
+
+.checklist .remove-extra {
+  min-height: 28px;
+  width: 28px;
+  font-size: 16px;
 }
 
 .shop-group h2 {

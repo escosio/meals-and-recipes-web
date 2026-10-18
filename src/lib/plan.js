@@ -26,15 +26,15 @@ export function toList(value) {
 
 /**
  * What's in a slot once the weekly routine is taken into account.
- * An explicit entry in the plan (even an empty list) overrides the routine
- * for that week only. routineIds says which of the ids come from the routine.
+ * An entry in the plan (even an empty list) overrides the routine for that
+ * week only. routineIds says which of the ids come from the routine.
  */
 export function resolveSlot(plan, routine, dateKey, meal) {
   const routineIds = toList(routine[dowOf(dateKey)]?.[meal]);
   const day = plan[dateKey];
   if (day && Object.prototype.hasOwnProperty.call(day, meal)) {
     const ids = toList(day[meal]);
-    return { ids, routineIds: routineIds.filter((id) => ids.includes(id)), explicit: true };
+    return { ids, routineIds: routineIds.filter((id) => ids.includes(id)) };
   }
-  return { ids: routineIds, routineIds, explicit: false };
+  return { ids: routineIds, routineIds };
 }

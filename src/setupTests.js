@@ -16,4 +16,3 @@ if (!proto.close) {
 }
 
 window.confirm = () => true;
-window.HTMLElement.prototype.scrollIntoView = () => {};

@@ -3,9 +3,9 @@ import Sheet from "./Sheet";
 import { QUICK_OPTIONS, SIDE, PLAN_MEALS, PRIMARY_MEAL, fitsMeal, isMainFor, searchRecipes, filterByTags, splitFavorites, randomRecipe, recipeSummary, noteId, mealLabel } from "../lib/recipes";
 import { useRecipes } from "../lib/RecipesContext";
 import TagFilter from "./TagFilter";
-import { weekdayLong } from "../lib/dates";
+import { weekdayLong, parseISODate } from "../lib/dates";
 
-export default function RecipePicker({ open, slot, current, plannedIds, favorites, onClose, onChangeMeal, onPick, onRemove, onReorder, onOpenRecipe }) {
+export default function RecipePicker({ open, slot, getSlot, plannedIds, favorites, onClose, onChangeMeal, onPick, onRemove, onReorder, onOpenRecipe }) {
   const { recipes, getRecipe } = useRecipes();
   const [query, setQuery] = useState("");
   const [onlyThisMeal, setOnlyThisMeal] = useState(true);
@@ -35,10 +35,10 @@ export default function RecipePicker({ open, slot, current, plannedIds, favorite
 
   const [favList, restList] = useMemo(() => splitFavorites(list, favorites), [list, favorites]);
 
-  if (!slot) return <Sheet open={false} onClose={onClose} title="" />;
+  if (!slot) return null;
 
-  const dayName = weekdayLong(new Date(slot.date + "T00:00"));
-  const tonight = (current?.ids || []).map(getRecipe).filter(Boolean);
+  const dayName = weekdayLong(parseISODate(slot.date));
+  const tonight = getSlot(slot.date, slot.meal).ids.map(getRecipe).filter(Boolean);
   const onSlot = new Set(tonight.map((r) => r.id));
   const ids = tonight.map((r) => r.id);
 
@@ -74,7 +74,7 @@ export default function RecipePicker({ open, slot, current, plannedIds, favorite
               <button className="row" onClick={() => onPick(slot, r.id)}>
                 <div className="title">
                   <strong>
-                    {favorites?.has(r.id) && <span className="fav" aria-hidden="true">★ </span>}
+                    {favorites.has(r.id) && <span className="fav" aria-hidden="true">★ </span>}
                     {r.name}
                   </strong>
                   <small>{recipeSummary(r)}</small>
@@ -110,7 +110,7 @@ export default function RecipePicker({ open, slot, current, plannedIds, favorite
             onClick={() => onChangeMeal(m)}
           >
             {m}
-            {m !== PRIMARY_MEAL && current?.others?.[m] > 0 && <span className="count">{current.others[m]}</span>}
+            {m !== PRIMARY_MEAL && getSlot(slot.date, m).ids.length > 0 && <span className="count">{getSlot(slot.date, m).ids.length}</span>}
           </button>
         ))}
       </div>

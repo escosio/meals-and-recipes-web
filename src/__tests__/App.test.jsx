@@ -143,6 +143,8 @@ describe("favorites", () => {
     expect(row.querySelector(".fav")).toBeTruthy();
     fireEvent.click(row);
     fireEvent.click(openSheet("Hot Dogs").getByRole("button", { name: "Remove from favorites" }));
+    // The row must exist; only the star inside it should be gone.
+    // eslint-disable-next-line testing-library/prefer-presence-queries
     expect(screen.getByRole("button", { name: /^Hot Dogs/ }).querySelector(".fav")).toBeNull();
   });
 });

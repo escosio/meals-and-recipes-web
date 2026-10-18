@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import Sheet from "./Sheet";
-import { FORM_MEALS, TAGS } from "../lib/recipes";
+import { FORM_MEALS, PRIMARY_MEAL, TAGS } from "../lib/recipes";
 
-const EMPTY = { mealName: "", meal: "Dinner", tags: [], ingredient: "", instructions: "", link: "" };
+const EMPTY = { mealName: "", meal: PRIMARY_MEAL, tags: [], ingredient: "", instructions: "", link: "" };
 
 /**
  * Add or edit a recipe you've written yourself. Saves the same raw shape as

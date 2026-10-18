@@ -13,8 +13,8 @@ function FunnelIcon() {
  * Tag filter hidden behind a funnel button. Selected tags combine, so
  * "Kids" + "Quick" means both. Shows a count on the button when collapsed.
  */
-export default function TagFilter({ selected, onChange, defaultOpen = false }) {
-  const [open, setOpen] = useState(defaultOpen);
+export default function TagFilter({ selected, onChange }) {
+  const [open, setOpen] = useState(false);
   const toggle = (t) => onChange(selected.includes(t) ? selected.filter((x) => x !== t) : [...selected, t]);
 
   return (

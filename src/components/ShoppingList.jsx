@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { PLAN_MEALS } from "../lib/recipes";
 import { useRecipes } from "../lib/RecipesContext";
-import { weekDays, toISODate, weekdayShort, formatWeekRange, relativeWeekLabel, addDays, startOfWeek } from "../lib/dates";
+import WeekNav from "./WeekNav";
+import { weekDays, toISODate, weekdayShort, formatWeekRange, relativeWeekLabel } from "../lib/dates";
 
 export default function ShoppingList({ weekStart, onChangeWeek, getSlot, checked, onToggle, extras, onAddExtra, onRemoveExtra, onClearChecked, onToast }) {
   const { getRecipe } = useRecipes();
@@ -66,27 +67,20 @@ export default function ShoppingList({ weekStart, onChangeWeek, getSlot, checked
 
   return (
     <section aria-labelledby="shop-title">
-      <header className="weeknav">
-        <div>
-          <h1 id="shop-title">Shopping list</h1>
-          <p className="sub">
-            {relative ? `${relative}, ` : ""}
-            {formatWeekRange(weekStart)}. Built from the meals you planned.
-          </p>
-        </div>
-        <div className="controls">
-          <button className="btn icon" onClick={() => onChangeWeek(addDays(weekStart, -7))} aria-label="Previous week">‹</button>
-          <button className="btn" onClick={() => onChangeWeek(startOfWeek(new Date()))} disabled={relative === "This week"}>Today</button>
-          <button className="btn icon" onClick={() => onChangeWeek(addDays(weekStart, 7))} aria-label="Next week">›</button>
-        </div>
-      </header>
+      <WeekNav
+        id="shop-title"
+        title="Shopping list"
+        sub={`${relative ? `${relative}, ` : ""}${formatWeekRange(weekStart)}. Built from the meals you planned.`}
+        weekStart={weekStart}
+        onChangeWeek={onChangeWeek}
+      />
 
       {total > 0 && (
         <div className="shop-summary">
           <div className="progress" aria-hidden="true">
             <div style={{ width: `${(done / total) * 100}%` }} />
           </div>
-          <span className="hint" style={{ color: "var(--muted)", fontSize: 14 }}>
+          <span className="hint">
             {done} of {total} in the cart
           </span>
           <div className="controls">
@@ -138,8 +132,17 @@ export default function ShoppingList({ weekStart, onChangeWeek, getSlot, checked
                 <label>
                   <input type="checkbox" checked={!!weekChecked[`extra:${e.id}`]} onChange={() => onToggle(weekKey, `extra:${e.id}`)} />
                   <span>{e.text}</span>
-                  <span className="spacer" style={{ flex: 1 }} />
-                  <button className="btn icon quiet" style={{ minHeight: 28, width: 28, fontSize: 16 }} aria-label={`Remove ${e.text}`} onClick={(ev) => { ev.preventDefault(); onRemoveExtra(weekKey, e.id); }}>×</button>
+                  <span className="spacer" />
+                  <button
+                    className="btn icon quiet remove-extra"
+                    aria-label={`Remove ${e.text}`}
+                    onClick={(ev) => {
+                      ev.preventDefault();
+                      onRemoveExtra(weekKey, e.id);
+                    }}
+                  >
+                    ×
+                  </button>
                 </label>
               </li>
             ))}

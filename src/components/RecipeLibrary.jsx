@@ -1,22 +1,17 @@
 import { useMemo, useState } from "react";
-import { searchRecipes, filterByTags, splitFavorites, recipeSummary, MEALS, SIDE } from "../lib/recipes";
+import { searchRecipes, filterByTags, splitFavorites, recipeSummary, mealLabel, MEALS, SIDE } from "../lib/recipes";
 import { useRecipes } from "../lib/RecipesContext";
 import TagFilter from "./TagFilter";
 
 export default function RecipeLibrary({ favorites, plannedThisWeek, onOpenRecipe, onAddRecipe }) {
   const { recipes } = useRecipes();
-  const FILTERS = useMemo(
-    () => ["All", ...MEALS, "Sides", ...(recipes.some((r) => r.meal === "Any") ? ["Any time"] : [])],
-    [recipes],
-  );
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
   const [tags, setTags] = useState([]);
 
   const visible = useMemo(() => {
     let list = recipes;
-    if (filter === "Any time") list = list.filter((r) => r.meal === "Any");
-    else if (filter === "Sides") list = list.filter((r) => r.meal === SIDE);
+    if (filter === "Sides") list = list.filter((r) => r.meal === SIDE);
     else if (filter !== "All") list = list.filter((r) => r.meal === filter || r.meal === "Any");
     return searchRecipes(filterByTags(list, tags), query);
   }, [query, filter, tags, recipes]);
@@ -26,11 +21,12 @@ export default function RecipeLibrary({ favorites, plannedThisWeek, onOpenRecipe
     const [favs, rest] = splitFavorites(visible, favorites);
     const favGroup = favs.length ? [["Favorites", favs]] : [];
     if (filter !== "All") return [...favGroup, [favs.length ? filter : null, rest]].filter(([, list]) => list.length);
-    const order = ["Breakfast", "Lunch", "Dinner", SIDE, "Any"];
-    const labels = { Any: "Any time", [SIDE]: "Sides" };
+    const order = [...MEALS, SIDE, "Any"];
     return [
       ...favGroup,
-      ...order.map((m) => [labels[m] || m, rest.filter((r) => r.meal === m)]).filter(([, list]) => list.length),
+      ...order
+        .map((m) => [m === SIDE ? "Sides" : mealLabel(m), rest.filter((r) => r.meal === m)])
+        .filter(([, list]) => list.length),
     ];
   }, [visible, filter, favorites]);
 
@@ -57,7 +53,7 @@ export default function RecipeLibrary({ favorites, plannedThisWeek, onOpenRecipe
           />
         </div>
         <div className="chips" role="group" aria-label="Filter by meal">
-          {FILTERS.map((f) => (
+          {["All", ...MEALS, "Sides"].map((f) => (
             <button key={f} className="chip" aria-pressed={filter === f} onClick={() => setFilter(f)}>
               {f}
               {f === "All" && <span className="count">{recipes.length}</span>}
@@ -95,7 +91,6 @@ export default function RecipeLibrary({ favorites, plannedThisWeek, onOpenRecipe
                         {r.tags.slice(0, 2).map((t) => (
                           <span key={t} className="pill muted tag-pill">{t}</span>
                         ))}
-                        {filter === "All" && r.meal === "Any" && <span className="pill muted">Any time</span>}
                       </div>
                     </button>
                   </li>

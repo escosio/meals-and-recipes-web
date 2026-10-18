@@ -1,8 +1,8 @@
 import { useState } from "react";
 import Sheet from "./Sheet";
-import { PLAN_MEALS, fitsMeal, linkify, hostOf, mealLabel as labelFor } from "../lib/recipes";
+import { PLAN_MEALS, PRIMARY_MEAL, fitsMeal, linkify, hostOf, mealLabel } from "../lib/recipes";
 import { useRecipes } from "../lib/RecipesContext";
-import { weekDays, toISODate, weekdayShort } from "../lib/dates";
+import { weekDays, toISODate, weekdayShort, parseISODate } from "../lib/dates";
 import { dowOf, dowName, toList } from "../lib/plan";
 
 function Text({ text }) {
@@ -23,13 +23,13 @@ export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot,
   const [checked, setChecked] = useState({});
   const [picking, setPicking] = useState(false);
 
-  if (!recipe) return <Sheet open={false} onClose={onClose} title="" />;
+  if (!recipe) return null;
 
   const toggle = (i) => setChecked((c) => ({ ...c, [i]: !c[i] }));
   const repeats = slot ? toList(routine[dowOf(slot.date)]?.[slot.meal]).includes(recipe.id) : false;
   const dayLabel = slot ? dowName(dowOf(slot.date)) : "";
-  const mealLabel = labelFor(recipe.meal);
-  const subtitle = recipe.isNote ? "Not a recipe" : recipe.custom ? `${mealLabel}. Added by you.` : mealLabel;
+  const mealText = mealLabel(recipe.meal);
+  const subtitle = recipe.isNote ? "Not a recipe" : recipe.custom ? `${mealText}. Added by you.` : mealText;
 
   const handleClose = () => {
     setChecked({});
@@ -40,7 +40,7 @@ export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot,
   const footer = slot ? (
     <>
       <button className="btn danger" onClick={() => onRemove(slot, recipe.id)}>
-        Remove from {weekdayShort(new Date(slot.date + "T00:00"))}
+        Remove from {weekdayShort(parseISODate(slot.date))}
       </button>
       <button className="btn quiet" onClick={() => onRepeat(slot, recipe.id, !repeats)}>
         {repeats ? `Stop repeating on ${dayLabel}s` : `Repeat every ${dayLabel}`}
@@ -64,7 +64,7 @@ export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot,
     </>
   );
 
-  const isFav = favorites?.has(recipe.id);
+  const isFav = favorites.has(recipe.id);
   const star = !recipe.isNote && (
     <button
       className={`btn icon quiet star${isFav ? " on" : ""}`}
@@ -148,7 +148,7 @@ function DayPicker({ recipe, weekStart, getSlot, onPick }) {
               {weekdayShort(d)} <small>{d.getDate()}</small>
             </div>
             <div className="dp-meals">
-              {PLAN_MEALS.filter((meal) => fitsMeal(recipe, meal) || meal === "Dinner").map((meal) => {
+              {PLAN_MEALS.filter((meal) => fitsMeal(recipe, meal) || meal === PRIMARY_MEAL).map((meal) => {
                 const current = getSlot(key, meal).ids.map(getRecipe).filter(Boolean);
                 const already = current.some((r) => r.id === recipe.id);
                 return (

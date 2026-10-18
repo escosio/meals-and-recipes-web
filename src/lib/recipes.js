@@ -160,9 +160,7 @@ export function searchRecipes(list, query) {
   const q = query.trim().toLowerCase();
   if (!q) return list;
   return list.filter(
-    (r) =>
-      r.name.toLowerCase().includes(q) ||
-      (r.ingredients || []).some((i) => i.toLowerCase().includes(q)),
+    (r) => r.name.toLowerCase().includes(q) || r.ingredients.some((i) => i.toLowerCase().includes(q)),
   );
 }
 

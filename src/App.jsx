@@ -9,7 +9,7 @@ import RecipeForm from "./components/RecipeForm";
 import { RecipesProvider } from "./lib/RecipesContext";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { PLAN_MEALS, PRIMARY_MEAL, buildLibrary, randomRecipe, newRecipeId } from "./lib/recipes";
-import { startOfWeek, weekDays, toISODate, weekdayShort } from "./lib/dates";
+import { startOfWeek, weekDays, toISODate, weekdayShort, parseISODate } from "./lib/dates";
 import { DEFAULT_ROUTINE, resolveSlot, toList, dowOf, dowName } from "./lib/plan";
 
 const VIEWS = [
@@ -55,14 +55,14 @@ export default function App() {
     for (const d of weekDays(weekStart)) {
       const dayKey = toISODate(d);
       for (const meal of PLAN_MEALS) {
-        for (const id of resolveSlot(plan, routine, dayKey, meal).ids) {
+        for (const id of getSlot(dayKey, meal).ids) {
           if (!map.has(id)) map.set(id, []);
           map.get(id).push(weekdayShort(d));
         }
       }
     }
     return map;
-  }, [plan, routine, weekStart]);
+  }, [getSlot, weekStart]);
   const plannedIds = useMemo(() => new Set(plannedThisWeek.keys()), [plannedThisWeek]);
 
   // Write a slot's list for one week. An empty list is kept as an explicit
@@ -87,23 +87,17 @@ export default function App() {
   // Add a recipe to a night (keeps whatever is already there).
   const assign = useCallback(
     (slot, recipeId) => {
-      const { ids } = resolveSlot(plan, routine, slot.date, slot.meal);
+      const { ids } = getSlot(slot.date, slot.meal);
       if (ids.includes(recipeId)) return;
       writeSlot(slot, [...ids, recipeId]);
     },
-    [plan, routine, writeSlot],
+    [getSlot, writeSlot],
   );
 
-  // Put a night's dishes in a new order.
-  const reorder = useCallback((slot, ids) => writeSlot(slot, ids), [writeSlot]);
-
-  // Remove one recipe from a night, or everything when no id is given.
+  // Remove one recipe from a night.
   const remove = useCallback(
-    (slot, recipeId) => {
-      const { ids } = resolveSlot(plan, routine, slot.date, slot.meal);
-      writeSlot(slot, recipeId ? ids.filter((id) => id !== recipeId) : []);
-    },
-    [plan, routine, writeSlot],
+    (slot, recipeId) => writeSlot(slot, getSlot(slot.date, slot.meal).ids.filter((id) => id !== recipeId)),
+    [getSlot, writeSlot],
   );
 
   const setRepeat = (slot, recipeId, on) => {
@@ -123,19 +117,17 @@ export default function App() {
     setDetail(null);
   };
 
-  const openSlot = (slot) => setPicker(slot);
-
   const handlePick = (slot, recipeId) => {
     assign(slot, recipeId);
     setPicker(null);
-    const day = weekdayShort(new Date(slot.date + "T00:00"));
+    const day = weekdayShort(parseISODate(slot.date));
     setToast(`${getRecipe(recipeId).name} added to ${day}${slot.meal === PRIMARY_MEAL ? "" : ` ${slot.meal.toLowerCase()}`}`);
   };
 
   const handleAssignFromDetail = (slot, recipeId) => {
     assign(slot, recipeId);
     setDetail(null);
-    setToast(`Added to ${weekdayShort(new Date(slot.date + "T00:00"))} ${slot.meal.toLowerCase()}`);
+    setToast(`Added to ${weekdayShort(parseISODate(slot.date))} ${slot.meal.toLowerCase()}`);
     setView("plan");
   };
 
@@ -236,7 +228,7 @@ export default function App() {
             weekStart={weekStart}
             onChangeWeek={setWeekStart}
             getSlot={getSlot}
-            onOpenSlot={openSlot}
+            onOpenSlot={setPicker}
             onFillEmpty={fillEmptyDinners}
             onClearWeek={clearWeek}
           />
@@ -300,21 +292,14 @@ export default function App() {
       <RecipePicker
         open={!!picker}
         slot={picker}
-        current={
-          picker
-            ? {
-                ...getSlot(picker.date, picker.meal),
-                others: Object.fromEntries(PLAN_MEALS.map((m) => [m, getSlot(picker.date, m).ids.length])),
-              }
-            : null
-        }
+        getSlot={getSlot}
         plannedIds={plannedIds}
         favorites={favorites}
         onClose={() => setPicker(null)}
         onChangeMeal={(meal) => setPicker((p) => (p ? { ...p, meal } : p))}
         onPick={handlePick}
         onRemove={remove}
-        onReorder={reorder}
+        onReorder={writeSlot}
         onOpenRecipe={openFromPicker}
       />
 

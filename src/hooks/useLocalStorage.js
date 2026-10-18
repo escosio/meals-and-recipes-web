@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
+/** useState that mirrors its value into localStorage under `key`. */
 export function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
     try {
@@ -18,9 +19,5 @@ export function useLocalStorage(key, initialValue) {
     }
   }, [key, value]);
 
-  const update = useCallback((next) => {
-    setValue((prev) => (typeof next === "function" ? next(prev) : next));
-  }, []);
-
-  return [value, update];
+  return [value, setValue];
 }
