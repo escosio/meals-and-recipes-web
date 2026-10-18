@@ -798,6 +798,32 @@ a {
   font-size: 14px;
 }
 
+.sheet-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.star {
+  font-size: 20px;
+  color: var(--muted);
+}
+
+.btn.quiet.star.on,
+.btn.quiet.star.on:hover {
+  color: var(--gold);
+}
+
+.btn.quiet.star:hover {
+  color: var(--gold);
+  background: var(--gold-soft);
+}
+
+.fav {
+  color: var(--gold);
+}
+
 .sheet-body {
   overflow-y: auto;
   padding: 16px 20px 24px;
@@ -1029,16 +1055,72 @@ a {
 .tonight .tonight-name {
   flex: 1;
   text-align: left;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 17px;
   letter-spacing: -0.01em;
   color: var(--green-ink);
   padding: 6px 0;
 }
 
+/* The top dish is the main. */
+.tonight li:first-child .tonight-name {
+  font-weight: 800;
+}
+
+.tonight li:first-child {
+  background: var(--green);
+}
+
+.tonight li:first-child .tonight-name,
+.tonight li:first-child .grip,
+.tonight li:first-child .btn {
+  color: #fff;
+}
+
+.tonight li:first-child .btn.quiet:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
 .tonight li.note .tonight-name {
   font-style: italic;
   font-weight: 500;
+}
+
+.tonight li[draggable="true"] {
+  cursor: grab;
+}
+
+.tonight li.dragging {
+  opacity: 0.4;
+}
+
+.tonight li.over {
+  box-shadow: inset 0 2px 0 var(--green);
+}
+
+.tonight .grip {
+  color: var(--green-ink);
+  opacity: 0.55;
+  font-size: 14px;
+  letter-spacing: -3px;
+  margin-right: 4px;
+  user-select: none;
+}
+
+.tonight .order-btns {
+  display: inline-flex;
+  gap: 0;
+}
+
+.tonight .order-btns .btn {
+  width: 30px;
+  min-height: 30px;
+  font-size: 15px;
+}
+
+.tonight .order-btns .btn:disabled {
+  opacity: 0.25;
 }
 
 .note-row {

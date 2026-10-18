@@ -148,6 +148,12 @@ export function filterByTags(list, tags) {
   return list.filter((r) => tags.every((t) => r.tags.includes(t)));
 }
 
+/** Split a list into [favorites, everything else], keeping order. */
+export function splitFavorites(list, favorites) {
+  if (!favorites || favorites.size === 0) return [[], list];
+  return [list.filter((r) => favorites.has(r.id)), list.filter((r) => !favorites.has(r.id))];
+}
+
 export function searchRecipes(list, query) {
   const q = query.trim().toLowerCase();
   if (!q) return list;

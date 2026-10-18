@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
  * Bottom sheet on phones, centred dialog on larger screens.
  * Built on the native <dialog> so Escape, focus trapping and the backdrop come free.
  */
-export default function Sheet({ open, onClose, title, subtitle, children, footer }) {
+export default function Sheet({ open, onClose, title, subtitle, children, footer, headAction }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -41,9 +41,12 @@ export default function Sheet({ open, onClose, title, subtitle, children, footer
             <h2>{title}</h2>
             {subtitle && <p className="sub">{subtitle}</p>}
           </div>
-          <button className="btn icon quiet" onClick={() => ref.current?.close()} aria-label="Close">
-            ×
-          </button>
+          <div className="sheet-head-actions">
+            {headAction}
+            <button className="btn icon quiet" onClick={() => ref.current?.close()} aria-label="Close">
+              ×
+            </button>
+          </div>
         </div>
         <div className="sheet-body">{children}</div>
         {footer && <div className="sheet-foot">{footer}</div>}

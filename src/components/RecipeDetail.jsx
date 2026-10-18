@@ -17,7 +17,7 @@ function Text({ text }) {
   );
 }
 
-export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot, routine, onClose, onAssign, onRemove, onRepeat, onSwap, onEdit }) {
+export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot, routine, favorites, onToggleFavorite, onClose, onAssign, onRemove, onRepeat, onSwap, onEdit }) {
   const { getRecipe } = useRecipes();
   const recipe = getRecipe(recipeId);
   const [checked, setChecked] = useState({});
@@ -64,8 +64,21 @@ export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot,
     </>
   );
 
+  const isFav = favorites?.has(recipe.id);
+  const star = !recipe.isNote && (
+    <button
+      className={`btn icon quiet star${isFav ? " on" : ""}`}
+      aria-pressed={isFav}
+      aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
+      title={isFav ? "Favorite" : "Add to favorites"}
+      onClick={() => onToggleFavorite(recipe.id)}
+    >
+      {isFav ? "★" : "☆"}
+    </button>
+  );
+
   return (
-    <Sheet open={open} onClose={handleClose} title={recipe.name} subtitle={subtitle} footer={footer}>
+    <Sheet open={open} onClose={handleClose} title={recipe.name} subtitle={subtitle} footer={footer} headAction={star}>
       {picking ? (
         <DayPicker recipe={recipe} weekStart={weekStart} getSlot={getSlot} onPick={(s) => onAssign(s, recipe.id)} />
       ) : (

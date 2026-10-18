@@ -111,6 +111,42 @@ describe("adding recipes", () => {
   });
 });
 
+describe("favorites", () => {
+  test("starring a recipe puts it in a Favorites section at the top of the book and the picker", () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: /^Zesty Fried Chicken/ }));
+    fireEvent.click(openSheet("Zesty Fried Chicken").getByRole("button", { name: "Add to favorites" }));
+    fireEvent.click(openSheet("Zesty Fried Chicken").getByRole("button", { name: "Close" }));
+
+    // A Favorites section appears first, holding the starred recipe.
+    const headings = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
+    expect(headings[0]).toBe("Favorites");
+    const rows = screen.getAllByRole("button", { name: /ingredients/ }).map((b) => b.textContent);
+    expect(rows[0]).toMatch(/Zesty Fried Chicken/);
+    expect(screen.getByRole("button", { name: /^Zesty Fried Chicken/ }).querySelector(".fav")).toBeTruthy();
+
+    goTo("Plan");
+    fireEvent.click(screen.getAllByRole("button", { name: /dinner: nothing planned$/ })[0]);
+    const picker = screen.getAllByRole("dialog", { hidden: true }).find((d) => d.hasAttribute("open"));
+    expect(within(picker).getByRole("heading", { name: "Favorites" })).toBeInTheDocument();
+    const first = within(picker).getAllByRole("button", { name: /ingredients/ })[0];
+    expect(first).toHaveTextContent("Zesty Fried Chicken");
+  });
+
+  test("the star can be removed again and favorites persist", () => {
+    const { unmount } = render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: /^Hot Dogs/ }));
+    fireEvent.click(openSheet("Hot Dogs").getByRole("button", { name: "Add to favorites" }));
+    unmount();
+    render(<App />);
+    const row = screen.getByRole("button", { name: /^Hot Dogs/ });
+    expect(row.querySelector(".fav")).toBeTruthy();
+    fireEvent.click(row);
+    fireEvent.click(openSheet("Hot Dogs").getByRole("button", { name: "Remove from favorites" }));
+    expect(screen.getByRole("button", { name: /^Hot Dogs/ }).querySelector(".fav")).toBeNull();
+  });
+});
+
 describe("adding to the plan", () => {
   test("picking a recipe for a night puts it on the calendar and the shopping list", async () => {
     const user = userEvent.setup();
@@ -144,6 +180,31 @@ describe("adding to the plan", () => {
     expect(picker.queryByRole("button", { name: /^Tacos/ })).not.toBeInTheDocument();
     await user.type(picker.getByRole("searchbox"), "rice");
     fireEvent.click(picker.getByRole("button", { name: /^White Rice/ }));
+    expect(screen.getByRole("button", { name: /^Sunday dinner: Meatballs and White Rice/ })).toBeInTheDocument();
+  });
+
+  test("dishes on a night can be reordered", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    goTo("Plan");
+    fireEvent.click(screen.getByRole("button", { name: /^Sunday dinner: Meatballs/ }));
+    let picker = openSheet("Sunday dinner");
+    await user.type(picker.getByRole("searchbox"), "rice");
+    fireEvent.click(picker.getByRole("button", { name: /^White Rice/ }));
+    expect(screen.getByRole("button", { name: /^Sunday dinner: Meatballs and White Rice/ })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^Sunday dinner: Meatballs and/ }));
+    picker = openSheet("Sunday dinner");
+    expect(picker.getByRole("button", { name: "Move Meatballs up" })).toBeDisabled();
+    fireEvent.click(picker.getByRole("button", { name: "Move White Rice up" }));
+    expect(screen.getByRole("button", { name: /^Sunday dinner: White Rice and Meatballs/ })).toBeInTheDocument();
+
+    // Drag Meatballs back on top.
+    const items = picker.getByRole("list", { name: "Already planned" }).querySelectorAll("li");
+    const dataTransfer = { effectAllowed: "", setData: () => {}, getData: () => "meatballs" };
+    fireEvent.dragStart(items[1], { dataTransfer });
+    fireEvent.dragOver(items[0], { dataTransfer });
+    fireEvent.drop(items[0], { dataTransfer });
     expect(screen.getByRole("button", { name: /^Sunday dinner: Meatballs and White Rice/ })).toBeInTheDocument();
   });
 

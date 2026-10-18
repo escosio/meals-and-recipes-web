@@ -4,6 +4,7 @@ type Recipe = {
   ingredient: string;
   instructions: string;
   tags?: Tag[];
+  id?: string;
 };
 
 type mealType = "Breakfast" | "Lunch" | "Dinner" | "Side" | "All";
@@ -84,7 +85,8 @@ export const recipes: Recipe[] = [
   },
   {
     meal: "Dinner",
-    mealName: "Pork chops & arroz",
+    mealName: "Chuletas",
+    id: "pork-chops-and-arroz", // keeps existing plans pointing at this recipe
     tags: ["Puerto Rican"],
     ingredient:
       "- Get thin pork chops\n- Milk\n- Oil\n- Rice\n- Beans\n- Onions",
@@ -352,6 +354,15 @@ export const recipes: Recipe[] = [
     ingredient: "1 1/2 lb small potatoes, halved\n2 tbsp olive oil\n1 tsp salt\n1/2 tsp garlic powder\nBlack pepper\nDried rosemary or adobo",
     instructions:
       "Heat the oven to 425°F.\nToss the potatoes with the oil, salt, garlic powder, pepper and herbs on a sheet pan. Spread them cut side down.\nRoast 25-30 minutes, flipping once, until crisp outside and tender inside.",
+  },
+  {
+    meal: "Side",
+    mealName: "Habichuelas",
+    tags: ["Puerto Rican", "Quick"],
+    ingredient:
+      "1 tbsp olive oil\n1/4 onion, diced\n1 garlic clove, minced\n4 tbsp sofrito\n1/4 cup tomato sauce (a little less is fine)\n1 packet sazon con achiote\n1/2 tsp adobo\n1 (15 oz) can pink or red beans, with their liquid\n1/2 cup water\n1 small potato, diced (optional)\nA few green olives (optional)\nSalt to taste",
+    instructions:
+      "Heat the oil in a small pot over medium. Cook the onion and garlic until soft, about 3 minutes.\nAdd the sofrito and tomato sauce and cook until fragrant, about 2 minutes. Stir in the sazon and adobo.\nAdd the beans with their liquid, the water, and the potato and olives if using.\nSimmer on low, uncovered, 15-20 minutes until the sauce thickens and the potato is tender. Taste for salt. Serve over white rice.",
   },
   {
     meal: "Side",

@@ -27,6 +27,12 @@ export default function App() {
   const [routine, setRoutine] = useLocalStorage("meals.routine.v3", DEFAULT_ROUTINE);
   // Recipes added in the app, stored raw so they can be synced later.
   const [customRecipes, setCustomRecipes] = useLocalStorage("meals.recipes.v1", []);
+  const [favoriteIds, setFavoriteIds] = useLocalStorage("meals.favorites.v1", []);
+  const favorites = useMemo(() => new Set(favoriteIds), [favoriteIds]);
+  const toggleFavorite = useCallback(
+    (id) => setFavoriteIds((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id])),
+    [setFavoriteIds],
+  );
   const library = useMemo(() => buildLibrary(customRecipes), [customRecipes]);
   const { recipes, getRecipe } = library;
   const [editing, setEditing] = useState(null); // null | "new" | raw recipe being edited
@@ -87,6 +93,9 @@ export default function App() {
     },
     [plan, routine, writeSlot],
   );
+
+  // Put a night's dishes in a new order.
+  const reorder = useCallback((slot, ids) => writeSlot(slot, ids), [writeSlot]);
 
   // Remove one recipe from a night, or everything when no id is given.
   const remove = useCallback(
@@ -233,6 +242,7 @@ export default function App() {
         )}
         {view === "recipes" && (
           <RecipeLibrary
+            favorites={favorites}
             plannedThisWeek={plannedThisWeek}
             onOpenRecipe={(id) => setDetail({ recipeId: id })}
             onAddRecipe={() => setEditing("new")}
@@ -261,6 +271,8 @@ export default function App() {
         weekStart={weekStart}
         getSlot={getSlot}
         routine={routine}
+        favorites={favorites}
+        onToggleFavorite={toggleFavorite}
         onClose={() => setDetail(null)}
         onRepeat={setRepeat}
         onAssign={handleAssignFromDetail}
@@ -289,9 +301,11 @@ export default function App() {
         slot={picker}
         current={picker ? getSlot(picker.date, picker.meal) : null}
         plannedIds={plannedIds}
+        favorites={favorites}
         onClose={() => setPicker(null)}
         onPick={handlePick}
         onRemove={remove}
+        onReorder={reorder}
         onOpenRecipe={openFromPicker}
       />
 

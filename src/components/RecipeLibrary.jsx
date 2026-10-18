@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { searchRecipes, filterByTags, recipeSummary, MEALS, SIDE } from "../lib/recipes";
+import { searchRecipes, filterByTags, splitFavorites, recipeSummary, MEALS, SIDE } from "../lib/recipes";
 import { useRecipes } from "../lib/RecipesContext";
 import TagFilter from "./TagFilter";
 
-export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe, onAddRecipe }) {
+export default function RecipeLibrary({ favorites, plannedThisWeek, onOpenRecipe, onAddRecipe }) {
   const { recipes } = useRecipes();
   const FILTERS = useMemo(
     () => ["All", ...MEALS, "Sides", ...(recipes.some((r) => r.meal === "Any") ? ["Any time"] : [])],
@@ -21,14 +21,18 @@ export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe, onAddReci
     return searchRecipes(filterByTags(list, tags), query);
   }, [query, filter, tags, recipes]);
 
+  // Favorites get their own section on top; the rest group by meal.
   const grouped = useMemo(() => {
-    if (filter !== "All") return [[null, visible]];
+    const [favs, rest] = splitFavorites(visible, favorites);
+    const favGroup = favs.length ? [["Favorites", favs]] : [];
+    if (filter !== "All") return [...favGroup, [favs.length ? filter : null, rest]].filter(([, list]) => list.length);
     const order = ["Breakfast", "Lunch", "Dinner", SIDE, "Any"];
     const labels = { Any: "Any time", [SIDE]: "Sides" };
-    return order
-      .map((m) => [labels[m] || m, visible.filter((r) => r.meal === m)])
-      .filter(([, list]) => list.length);
-  }, [visible, filter]);
+    return [
+      ...favGroup,
+      ...order.map((m) => [labels[m] || m, rest.filter((r) => r.meal === m)]).filter(([, list]) => list.length),
+    ];
+  }, [visible, filter, favorites]);
 
   return (
     <section aria-labelledby="recipes-title">
@@ -79,7 +83,10 @@ export default function RecipeLibrary({ plannedThisWeek, onOpenRecipe, onAddReci
                   <li key={r.id}>
                     <button className="row" onClick={() => onOpenRecipe(r.id)}>
                       <div className="title">
-                        <strong>{r.name}</strong>
+                        <strong>
+                          {favorites.has(r.id) && <span className="fav" aria-hidden="true">★ </span>}
+                          {r.name}
+                        </strong>
                         <small>{recipeSummary(r)}</small>
                       </div>
                       <div className="meta">
