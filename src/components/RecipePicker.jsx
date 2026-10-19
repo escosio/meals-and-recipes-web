@@ -4,8 +4,14 @@ import { QUICK_OPTIONS, SIDE, PLAN_MEALS, PRIMARY_MEAL, fitsMeal, isMainFor, sea
 import { useRecipes } from "../lib/RecipesContext";
 import TagFilter from "./TagFilter";
 import { weekdayLong, parseISODate } from "../lib/dates";
+import { dowName } from "../lib/plan";
 
-export default function RecipePicker({ open, slot, getSlot, plannedIds, favorites, onClose, onChangeMeal, onPick, onRemove, onReorder, onOpenRecipe }) {
+/**
+ * Choose what goes on a slot. A slot is { date, meal } for one night, or
+ * { dow, meal } for the weekly routine. `getIds(meal)` returns what's on the
+ * same day for any meal.
+ */
+export default function RecipePicker({ open, slot, getIds, plannedIds, favorites, onClose, onChangeMeal, onPick, onRemove, onReorder, onOpenRecipe }) {
   const { recipes, getRecipe } = useRecipes();
   const [query, setQuery] = useState("");
   const [onlyThisMeal, setOnlyThisMeal] = useState(true);
@@ -16,7 +22,7 @@ export default function RecipePicker({ open, slot, getSlot, plannedIds, favorite
   const dragId = useRef(null);
 
   // Reset the search when the sheet opens or the meal changes, but not on every re-render of the slot.
-  const slotKey = slot ? `${slot.date}:${slot.meal}` : "";
+  const slotKey = slot ? `${slot.date ?? `dow${slot.dow}`}:${slot.meal}` : "";
   useEffect(() => {
     if (open) {
       setQuery("");
@@ -37,8 +43,9 @@ export default function RecipePicker({ open, slot, getSlot, plannedIds, favorite
 
   if (!slot) return null;
 
-  const dayName = weekdayLong(parseISODate(slot.date));
-  const tonight = getSlot(slot.date, slot.meal).ids.map(getRecipe).filter(Boolean);
+  const isRoutine = slot.date === undefined;
+  const dayName = isRoutine ? dowName(slot.dow) : weekdayLong(parseISODate(slot.date));
+  const tonight = getIds(slot.meal).map(getRecipe).filter(Boolean);
   const onSlot = new Set(tonight.map((r) => r.id));
   const ids = tonight.map((r) => r.id);
 
@@ -81,9 +88,9 @@ export default function RecipePicker({ open, slot, getSlot, plannedIds, favorite
                 </div>
                 <div className="meta">
                   {onSlot.has(r.id) ? (
-                    <span className="pill">Tonight</span>
+                    <span className="pill">{isRoutine ? "Every week" : "Tonight"}</span>
                   ) : (
-                    plannedIds.has(r.id) && <span className="pill gold">Planned</span>
+                    !isRoutine && plannedIds.has(r.id) && <span className="pill gold">Planned</span>
                   )}
                   {(!onlyThisMeal || r.meal === SIDE) && !sidesOnly && <span className="pill muted">{mealLabel(r.meal)}</span>}
                 </div>
@@ -97,8 +104,14 @@ export default function RecipePicker({ open, slot, getSlot, plannedIds, favorite
     <Sheet
       open={open}
       onClose={onClose}
-      title={`${dayName} ${slot.meal.toLowerCase()}`}
-      subtitle={tonight.length ? "Tap a dish to read it, or add another" : "Choose what to make"}
+      title={isRoutine ? `Every ${dayName}` : `${dayName} ${slot.meal.toLowerCase()}`}
+      subtitle={
+        isRoutine
+          ? `What ${slot.meal.toLowerCase()} repeats on ${dayName}s`
+          : tonight.length
+            ? "Tap a dish to read it, or add another"
+            : "Choose what to make"
+      }
     >
       <div className="meal-switch" role="tablist" aria-label="Meal">
         {PLAN_MEALS.map((m) => (
@@ -110,12 +123,12 @@ export default function RecipePicker({ open, slot, getSlot, plannedIds, favorite
             onClick={() => onChangeMeal(m)}
           >
             {m}
-            {m !== PRIMARY_MEAL && getSlot(slot.date, m).ids.length > 0 && <span className="count">{getSlot(slot.date, m).ids.length}</span>}
+            {m !== PRIMARY_MEAL && getIds(m).length > 0 && <span className="count">{getIds(m).length}</span>}
           </button>
         ))}
       </div>
       {tonight.length > 0 && (
-        <ul className="tonight" aria-label="Already planned">
+        <ul className="tonight" aria-label={isRoutine ? "Repeats every week" : "Already planned"}>
           {tonight.map((r, i) => (
             <li
               key={r.id}

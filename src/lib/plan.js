@@ -11,12 +11,12 @@ export function dowName(dow) {
   return weekdayLong(d);
 }
 
-// Things you make every week, keyed by weekday then meal.
-export const DEFAULT_ROUTINE = {
-  0: { Dinner: "note:Leftover meatballs" }, // Monday
-  4: { Dinner: "note:takeout" }, // Friday
-  6: { Dinner: "meatballs" }, // Sunday
-};
+// Things a household makes every week, keyed by weekday (Monday = 0) then
+// meal, each a list of recipe ids. Every household sets its own, so the
+// default is empty.
+export const DEFAULT_ROUTINE = {};
+
+export const DOWS = [0, 1, 2, 3, 4, 5, 6];
 
 /** Slots hold a list of ids. Older data stored a single id or null. */
 export function toList(value) {

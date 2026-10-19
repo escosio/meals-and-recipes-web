@@ -3,7 +3,7 @@ import { useRecipes } from "../lib/RecipesContext";
 import WeekNav from "./WeekNav";
 import { weekDays, toISODate, isSameDay, weekdayShort, weekdayLong, formatWeekRange, relativeWeekLabel } from "../lib/dates";
 
-export default function WeekPlanner({ weekStart, onChangeWeek, getSlot, onOpenSlot, onFillEmpty, onClearWeek }) {
+export default function WeekPlanner({ weekStart, onChangeWeek, getSlot, onOpenSlot, onFillEmpty, onClearWeek, onOpenRoutine }) {
   const { getRecipe } = useRecipes();
   const today = new Date();
   const days = weekDays(weekStart);
@@ -87,6 +87,9 @@ export default function WeekPlanner({ weekStart, onChangeWeek, getSlot, onOpenSl
       <div className="week-actions">
         <button className="btn" onClick={onFillEmpty} disabled={filled === 7}>
           Fill the empty nights for me
+        </button>
+        <button className="btn" onClick={onOpenRoutine}>
+          Weekly routine
         </button>
         {filled > 0 && (
           <button className="btn danger" onClick={onClearWeek}>

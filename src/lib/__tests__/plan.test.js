@@ -1,4 +1,4 @@
-import { resolveSlot, toList, dowOf, dowName, DEFAULT_ROUTINE } from "../plan";
+import { resolveSlot, toList, dowOf, dowName, DEFAULT_ROUTINE as ROUTINE_DEFAULT } from "../plan";
 
 // 2026-10-12 is a Monday.
 const MON = "2026-10-12";
@@ -27,16 +27,13 @@ describe("toList", () => {
   });
 });
 
-describe("the family routine", () => {
-  test("Sunday is meatballs, Monday leftovers, Friday takeout", () => {
-    expect(toList(DEFAULT_ROUTINE[6].Dinner)).toEqual(["meatballs"]);
-    expect(toList(DEFAULT_ROUTINE[0].Dinner)[0]).toMatch(/^note:Leftover/);
-    expect(toList(DEFAULT_ROUTINE[4].Dinner)).toEqual(["note:takeout"]);
-    expect(DEFAULT_ROUTINE[4].Lunch).toBeUndefined();
-  });
-});
-
 describe("resolveSlot", () => {
+  const DEFAULT_ROUTINE = { 6: { Dinner: ["meatballs"] } };
+
+  test("new households start with no routine", () => {
+    expect(ROUTINE_DEFAULT).toEqual({});
+  });
+
   test("falls back to the routine when the week has no entry", () => {
     const slot = resolveSlot({}, DEFAULT_ROUTINE, SUN, "Dinner");
     expect(slot).toEqual({ ids: ["meatballs"], routineIds: ["meatballs"] });

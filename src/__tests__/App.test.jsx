@@ -4,8 +4,12 @@ import { vi } from "vitest";
 import App from "../App";
 import { fakeServer } from "./fakeServer";
 
+// The family's routine, as a household would have set it up.
+const ROUTINE = { 0: { Dinner: ["note:Leftover meatballs"] }, 4: { Dinner: ["note:takeout"] }, 6: { Dinner: ["meatballs"] } };
+
 beforeEach(() => {
   window.localStorage.clear();
+  window.localStorage.setItem("meals.routine.v1", JSON.stringify(ROUTINE));
 });
 
 /** The open sheet whose title matches. */
@@ -110,6 +114,48 @@ describe("adding recipes", () => {
     fireEvent.click(openSheet("Renamed Dish").getByRole("button", { name: "Edit" }));
     fireEvent.click(openSheet("Edit recipe").getByRole("button", { name: "Delete" }));
     expect(screen.queryByText("Renamed Dish")).not.toBeInTheDocument();
+  });
+});
+
+describe("weekly routine", () => {
+  test("starts empty for a new household", () => {
+    window.localStorage.clear();
+    render(<App />);
+    goTo("Plan");
+    expect(screen.queryByRole("button", { name: /^Sunday dinner: Meatballs/ })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Weekly routine" }));
+    expect(openSheet("Weekly routine").getByText(/Nothing repeats yet/)).toBeInTheDocument();
+  });
+
+  test("a household sets its own routine from the routine sheet", async () => {
+    const user = userEvent.setup();
+    window.localStorage.clear();
+    render(<App />);
+    goTo("Plan");
+    fireEvent.click(screen.getByRole("button", { name: "Weekly routine" }));
+    fireEvent.click(openSheet("Weekly routine").getByRole("button", { name: /^Wednesday dinner routine: nothing/ }));
+
+    const picker = openSheet("Every Wednesday");
+    await user.type(picker.getByRole("searchbox"), "tacos");
+    fireEvent.click(picker.getByRole("button", { name: /^Tacos/ }));
+
+    // Back on the routine sheet, Wednesday shows tacos; the week grid shows it every week.
+    expect(openSheet("Weekly routine").getByRole("button", { name: /^Wednesday dinner routine: Tacos/ })).toBeInTheDocument();
+    fireEvent.click(openSheet("Weekly routine").getByRole("button", { name: "Close" }));
+    expect(screen.getByRole("button", { name: /^Wednesday dinner: Tacos/ })).toHaveTextContent("every week");
+    fireEvent.click(screen.getByRole("button", { name: "Next week" }));
+    expect(screen.getByRole("button", { name: /^Wednesday dinner: Tacos/ })).toBeInTheDocument();
+  });
+
+  test("a routine dish can be removed from the routine sheet", () => {
+    render(<App />);
+    goTo("Plan");
+    fireEvent.click(screen.getByRole("button", { name: "Weekly routine" }));
+    fireEvent.click(openSheet("Weekly routine").getByRole("button", { name: /^Sunday dinner routine: Meatballs/ }));
+    fireEvent.click(openSheet("Every Sunday").getByRole("button", { name: "Remove Meatballs" }));
+    fireEvent.click(openSheet("Every Sunday").getByRole("button", { name: "Close" }));
+    fireEvent.click(openSheet("Weekly routine").getByRole("button", { name: "Close" }));
+    expect(screen.getByRole("button", { name: /^Sunday dinner: nothing planned/ })).toBeInTheDocument();
   });
 });
 

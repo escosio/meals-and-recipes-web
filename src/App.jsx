@@ -6,6 +6,7 @@ import RecipeDetail from "./components/RecipeDetail";
 import RecipePicker from "./components/RecipePicker";
 import ShoppingList from "./components/ShoppingList";
 import RecipeForm from "./components/RecipeForm";
+import RoutineSheet from "./components/RoutineSheet";
 import SyncSheet, { statusLabel } from "./components/SyncSheet";
 import { RecipesProvider } from "./lib/RecipesContext";
 import { useHousehold } from "./hooks/useHousehold";
@@ -64,7 +65,9 @@ export default function App() {
   const getSlot = useCallback((dateKey, meal) => resolveSlot(plan, routine, dateKey, meal), [plan, routine]);
 
   const [detail, setDetail] = useState(null); // { recipeId, slot? }
-  const [picker, setPicker] = useState(null); // { date, meal }
+  const [picker, setPicker] = useState(null); // { date, meal } for a night, { dow, meal } for the routine
+  const [routineOpen, setRoutineOpen] = useState(false);
+  const isRoutineSlot = (slot) => slot && slot.date === undefined;
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
@@ -108,44 +111,70 @@ export default function App() {
     [setPlan, routine],
   );
 
-  // Add a recipe to a night (keeps whatever is already there).
-  const assign = useCallback(
-    (slot, recipeId) => {
-      const { ids } = getSlot(slot.date, slot.meal);
-      if (ids.includes(recipeId)) return;
-      writeSlot(slot, [...ids, recipeId]);
+  // Write one meal of the weekly routine for a weekday.
+  const writeRoutine = useCallback(
+    (dow, meal, ids) => {
+      setRoutine((r) => {
+        const day = { ...(r[dow] || {}) };
+        if (ids.length) day[meal] = ids;
+        else delete day[meal];
+        const next = { ...r };
+        if (Object.keys(day).length) next[dow] = day;
+        else delete next[dow];
+        return next;
+      });
     },
-    [getSlot, writeSlot],
+    [setRoutine],
   );
 
-  // Remove one recipe from a night.
-  const remove = useCallback(
-    (slot, recipeId) => writeSlot(slot, getSlot(slot.date, slot.meal).ids.filter((id) => id !== recipeId)),
-    [getSlot, writeSlot],
+  // What's on a slot: a night's resolved list, or the routine for a weekday.
+  const idsFor = useCallback(
+    (slot, meal = slot.meal) => (isRoutineSlot(slot) ? toList(routine[slot.dow]?.[meal]) : getSlot(slot.date, meal).ids),
+    [routine, getSlot],
   );
+
+  const writeIds = useCallback(
+    (slot, ids) => (isRoutineSlot(slot) ? writeRoutine(slot.dow, slot.meal, ids) : writeSlot(slot, ids)),
+    [writeRoutine, writeSlot],
+  );
+
+  // Add a recipe to a slot (keeps whatever is already there).
+  const assign = useCallback(
+    (slot, recipeId) => {
+      const ids = idsFor(slot);
+      if (ids.includes(recipeId)) return;
+      writeIds(slot, [...ids, recipeId]);
+    },
+    [idsFor, writeIds],
+  );
+
+  // Remove one recipe from a slot.
+  const remove = useCallback((slot, recipeId) => writeIds(slot, idsFor(slot).filter((id) => id !== recipeId)), [idsFor, writeIds]);
 
   const setRepeat = (slot, recipeId, on) => {
     const dow = dowOf(slot.date);
-    setRoutine((r) => {
-      const day = { ...(r[dow] || {}) };
-      const ids = toList(day[slot.meal]).filter((id) => id !== recipeId);
-      if (on) ids.push(recipeId);
-      if (ids.length) day[slot.meal] = ids;
-      else delete day[slot.meal];
-      const next = { ...r };
-      if (Object.keys(day).length) next[dow] = day;
-      else delete next[dow];
-      return next;
-    });
+    const ids = toList(routine[dow]?.[slot.meal]).filter((id) => id !== recipeId);
+    writeRoutine(dow, slot.meal, on ? [...ids, recipeId] : ids);
     setToast(on ? `${getRecipe(recipeId).name} every ${dowName(dow)}` : `${getRecipe(recipeId).name} no longer repeats on ${dowName(dow)}s`);
     setDetail(null);
   };
 
+  const closePicker = () => {
+    const wasRoutine = isRoutineSlot(picker);
+    setPicker(null);
+    if (wasRoutine) setRoutineOpen(true);
+  };
+
   const handlePick = (slot, recipeId) => {
     assign(slot, recipeId);
-    setPicker(null);
-    const day = weekdayShort(parseISODate(slot.date));
-    setToast(`${getRecipe(recipeId).name} added to ${day}${slot.meal === PRIMARY_MEAL ? "" : ` ${slot.meal.toLowerCase()}`}`);
+    const name = getRecipe(recipeId).name;
+    if (isRoutineSlot(slot)) {
+      setToast(`${name} every ${dowName(slot.dow)}`);
+    } else {
+      const day = weekdayShort(parseISODate(slot.date));
+      setToast(`${name} added to ${day}${slot.meal === PRIMARY_MEAL ? "" : ` ${slot.meal.toLowerCase()}`}`);
+    }
+    closePicker();
   };
 
   const handleAssignFromDetail = (slot, recipeId) => {
@@ -208,7 +237,8 @@ export default function App() {
 
   const openFromPicker = (slot, recipeId) => {
     setPicker(null);
-    setDetail({ recipeId, slot });
+    // Routine slots have no single night, so the sheet opens in plain reading mode.
+    setDetail({ recipeId, slot: isRoutineSlot(slot) ? undefined : slot });
   };
 
   const saveRecipe = (raw) => {
@@ -279,6 +309,7 @@ export default function App() {
             onOpenSlot={setPicker}
             onFillEmpty={fillEmptyDinners}
             onClearWeek={clearWeek}
+            onOpenRoutine={() => setRoutineOpen(true)}
           />
         )}
         {view === "recipes" && (
@@ -349,17 +380,26 @@ export default function App() {
         onLeave={household.leave}
         onToast={setToast}
       />
+      <RoutineSheet
+        open={routineOpen}
+        routine={routine}
+        onClose={() => setRoutineOpen(false)}
+        onEdit={(slot) => {
+          setRoutineOpen(false);
+          setPicker(slot);
+        }}
+      />
       <RecipePicker
         open={!!picker}
         slot={picker}
-        getSlot={getSlot}
+        getIds={(meal) => (picker ? idsFor(picker, meal) : [])}
         plannedIds={plannedIds}
         favorites={favorites}
-        onClose={() => setPicker(null)}
+        onClose={closePicker}
         onChangeMeal={(meal) => setPicker((p) => (p ? { ...p, meal } : p))}
         onPick={handlePick}
         onRemove={remove}
-        onReorder={writeSlot}
+        onReorder={writeIds}
         onOpenRecipe={openFromPicker}
       />
 
