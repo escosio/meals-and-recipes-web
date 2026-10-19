@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Sheet from "./Sheet";
-import { normaliseCode } from "../lib/api";
+import { normaliseCode, joinLink } from "../lib/api";
 
 export function statusLabel(status) {
   switch (status) {
@@ -30,6 +30,25 @@ export default function SyncSheet({ open, onClose, code, status, onCreate, onJoi
       onToast("Code copied");
     } catch {
       onToast("Couldn't copy. Read it out instead.");
+    }
+  };
+
+  // Phones get the system share sheet (Messages, WhatsApp...); desktops copy the link.
+  const share = async () => {
+    const link = joinLink(code);
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Meals & Recipes", text: `Join our meal plan: ${link}` });
+        return;
+      } catch (err) {
+        if (err?.name === "AbortError") return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(link);
+      onToast("Link copied. Send it to your wife.");
+    } catch {
+      onToast(`Couldn't copy. The link is ${link}`);
     }
   };
 
@@ -73,8 +92,11 @@ export default function SyncSheet({ open, onClose, code, status, onCreate, onJoi
               Leave household
             </button>
             <span className="spacer" />
-            <button className="btn primary" onClick={copy}>
+            <button className="btn" onClick={copy}>
               Copy code
+            </button>
+            <button className="btn primary" onClick={share}>
+              Share link
             </button>
           </>
         }
@@ -83,9 +105,10 @@ export default function SyncSheet({ open, onClose, code, status, onCreate, onJoi
           {code}
         </div>
         <p className="help">
-          Anyone with this code sees and edits the same weeks, routine, recipes and shopping list. Text it to your wife
-          and have her enter it under Sync on her phone.
+          Anyone with this code sees and edits the same weeks, routine, recipes and shopping list. Send your wife the
+          link and it joins when she opens it, or read her the code to enter under Sync.
         </p>
+        <p className="help link-preview">{joinLink(code)}</p>
         {status === "missing" && <p className="notice">This code isn't on the server any more. Leave and create a new one.</p>}
       </Sheet>
     );

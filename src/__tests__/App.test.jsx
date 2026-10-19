@@ -1,6 +1,8 @@
 import { render, screen, within, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 import App from "../App";
+import { fakeServer } from "./fakeServer";
 
 beforeEach(() => {
   window.localStorage.clear();
@@ -108,6 +110,49 @@ describe("adding recipes", () => {
     fireEvent.click(openSheet("Renamed Dish").getByRole("button", { name: "Edit" }));
     fireEvent.click(openSheet("Edit recipe").getByRole("button", { name: "Delete" }));
     expect(screen.queryByText("Renamed Dish")).not.toBeInTheDocument();
+  });
+});
+
+describe("share link", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    window.history.replaceState({}, "", "/");
+  });
+
+  test("opening ?join=CODE joins that household and cleans the URL", async () => {
+    const server = fakeServer();
+    server.seed({ plan: { "2026-10-20": { Dinner: ["empanadas"] } }, favorites: [] });
+    vi.spyOn(window, "fetch").mockImplementation(server.fetch);
+    window.history.replaceState({}, "", "/?join=abc234");
+
+    render(<App />);
+    await screen.findByText("Joined the household. Your plans are now shared.");
+    expect(window.location.search).toBe("");
+    expect(JSON.parse(window.localStorage.getItem("meals.household.v1"))).toBe("ABC234");
+    expect(screen.getByRole("button", { name: /^Sync: Synced|^Sync: Connecting/ })).toHaveTextContent("Shared");
+  });
+
+  test("a link with an unknown code explains itself and leaves the phone alone", async () => {
+    const server = fakeServer();
+    vi.spyOn(window, "fetch").mockImplementation(server.fetch);
+    window.history.replaceState({}, "", "/?join=ZZZZZZ");
+
+    render(<App />);
+    await screen.findByText("That share link doesn't match a household.");
+    expect(window.location.search).toBe("");
+    expect(window.localStorage.getItem("meals.household.v1")).toBe("null");
+  });
+
+  test("the Sync sheet offers the share link", async () => {
+    const server = fakeServer();
+    vi.spyOn(window, "fetch").mockImplementation(server.fetch);
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: /^Sync:/ }));
+    fireEvent.click(openSheet("Plan together").getByRole("button", { name: "Create a code" }));
+    const sheet = await screen.findByText("ABC234");
+    expect(sheet).toBeInTheDocument();
+    expect(screen.getByText(`${window.location.origin}/?join=ABC234`)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Share link" })).toBeInTheDocument();
   });
 });
 

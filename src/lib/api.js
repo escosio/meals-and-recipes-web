@@ -35,3 +35,20 @@ export { ApiError };
 export function normaliseCode(input) {
   return (input || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
+
+/** A link that joins the household when opened. */
+export function joinLink(code) {
+  return `${window.location.origin}/?join=${code}`;
+}
+
+/** The household code in the current URL's ?join= parameter, or null. */
+export function joinCodeFromUrl() {
+  const code = normaliseCode(new URLSearchParams(window.location.search).get("join"));
+  return code.length === 6 ? code : null;
+}
+
+/** Drop the ?join= parameter so a reload doesn't join again. */
+export function clearJoinParam() {
+  if (!window.location.search) return;
+  window.history.replaceState({}, "", window.location.pathname);
+}

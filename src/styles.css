@@ -181,6 +181,12 @@ a {
   margin: 8px 0 0;
 }
 
+.link-preview {
+  font-size: 13px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
 .sync-options {
   display: grid;
   gap: 18px;

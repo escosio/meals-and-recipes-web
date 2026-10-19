@@ -9,6 +9,7 @@ import RecipeForm from "./components/RecipeForm";
 import SyncSheet, { statusLabel } from "./components/SyncSheet";
 import { RecipesProvider } from "./lib/RecipesContext";
 import { useHousehold } from "./hooks/useHousehold";
+import { joinCodeFromUrl, clearJoinParam } from "./lib/api";
 import { PLAN_MEALS, PRIMARY_MEAL, buildLibrary, randomRecipe, newRecipeId } from "./lib/recipes";
 import { startOfWeek, weekDays, toISODate, weekdayShort, parseISODate } from "./lib/dates";
 import { DEFAULT_ROUTINE, resolveSlot, toList, dowOf, dowName } from "./lib/plan";
@@ -34,6 +35,23 @@ export default function App() {
   const setFavoriteIds = useCallback((v) => update("favorites", v), [update]);
   const setHiddenIds = useCallback((v) => update("hidden", v), [update]);
   const [syncOpen, setSyncOpen] = useState(false);
+
+  // Opening a share link (?join=CODE) joins that household once, then cleans the URL.
+  const { join: joinHousehold, code: currentCode } = household;
+  useEffect(() => {
+    const code = joinCodeFromUrl();
+    if (!code) return;
+    if (code === currentCode) {
+      clearJoinParam();
+      return;
+    }
+    joinHousehold(code)
+      .then(() => setToast("Joined the household. Your plans are now shared."))
+      .catch((err) => setToast(err.status === 404 ? "That share link doesn't match a household." : "Couldn't join right now. Try again from Sync."))
+      .finally(clearJoinParam);
+    // Run once on load only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const favorites = useMemo(() => new Set(favoriteIds), [favoriteIds]);
   const toggleFavorite = useCallback(
     (id) => setFavoriteIds((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id])),
