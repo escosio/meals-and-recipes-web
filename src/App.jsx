@@ -6,8 +6,9 @@ import RecipeDetail from "./components/RecipeDetail";
 import RecipePicker from "./components/RecipePicker";
 import ShoppingList from "./components/ShoppingList";
 import RecipeForm from "./components/RecipeForm";
+import SyncSheet, { statusLabel } from "./components/SyncSheet";
 import { RecipesProvider } from "./lib/RecipesContext";
-import { useLocalStorage } from "./hooks/useLocalStorage";
+import { useHousehold } from "./hooks/useHousehold";
 import { PLAN_MEALS, PRIMARY_MEAL, buildLibrary, randomRecipe, newRecipeId } from "./lib/recipes";
 import { startOfWeek, weekDays, toISODate, weekdayShort, parseISODate } from "./lib/dates";
 import { DEFAULT_ROUTINE, resolveSlot, toList, dowOf, dowName } from "./lib/plan";
@@ -21,13 +22,17 @@ const VIEWS = [
 export default function App() {
   const [view, setView] = useState("recipes");
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
-  const [plan, setPlan] = useLocalStorage("meals.plan.v1", {});
-  const [checked, setChecked] = useLocalStorage("meals.checked.v1", {});
-  const [extras, setExtras] = useLocalStorage("meals.extras.v1", {});
-  const [routine, setRoutine] = useLocalStorage("meals.routine.v6", DEFAULT_ROUTINE);
-  // Recipes added in the app, stored raw so they can be synced later.
-  const [customRecipes, setCustomRecipes] = useLocalStorage("meals.recipes.v1", []);
-  const [favoriteIds, setFavoriteIds] = useLocalStorage("meals.favorites.v1", []);
+  // Everything the household shares. Local-only until a household code is set.
+  const household = useHousehold({ plan: {}, routine: DEFAULT_ROUTINE, checked: {}, extras: {}, recipes: [], favorites: [] });
+  const { plan, routine, checked, extras, recipes: customRecipes, favorites: favoriteIds } = household.data;
+  const { update } = household;
+  const setPlan = useCallback((v) => update("plan", v), [update]);
+  const setRoutine = useCallback((v) => update("routine", v), [update]);
+  const setChecked = useCallback((v) => update("checked", v), [update]);
+  const setExtras = useCallback((v) => update("extras", v), [update]);
+  const setCustomRecipes = useCallback((v) => update("recipes", v), [update]);
+  const setFavoriteIds = useCallback((v) => update("favorites", v), [update]);
+  const [syncOpen, setSyncOpen] = useState(false);
   const favorites = useMemo(() => new Set(favoriteIds), [favoriteIds]);
   const toggleFavorite = useCallback(
     (id) => setFavoriteIds((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id])),
@@ -209,8 +214,19 @@ export default function App() {
     <RecipesProvider value={library}>
     <div className="app">
       <header className="topbar">
-        <div className="brand">
-          Meals <span>&amp; Recipes</span>
+        <div className="brand-row">
+          <div className="brand">
+            Meals <span>&amp; Recipes</span>
+          </div>
+          <button
+            className={`sync-pill ${household.status}`}
+            onClick={() => setSyncOpen(true)}
+            title={statusLabel(household.status)}
+            aria-label={`Sync: ${statusLabel(household.status)}`}
+          >
+            <span className="dot" aria-hidden="true" />
+            {household.code ? "Shared" : "Sync"}
+          </button>
         </div>
         <nav className="tabs" aria-label="Sections">
           {VIEWS.map((v) => (
@@ -288,6 +304,16 @@ export default function App() {
         onClose={() => setEditing(null)}
         onSave={saveRecipe}
         onDelete={deleteRecipe}
+      />
+      <SyncSheet
+        open={syncOpen}
+        onClose={() => setSyncOpen(false)}
+        code={household.code}
+        status={household.status}
+        onCreate={household.create}
+        onJoin={household.join}
+        onLeave={household.leave}
+        onToast={setToast}
       />
       <RecipePicker
         open={!!picker}
