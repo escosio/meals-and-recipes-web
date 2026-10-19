@@ -3,8 +3,8 @@ import { searchRecipes, filterByTags, splitFavorites, recipeSummary, mealLabel, 
 import { useRecipes } from "../lib/RecipesContext";
 import TagFilter from "./TagFilter";
 
-export default function RecipeLibrary({ favorites, plannedThisWeek, onOpenRecipe, onAddRecipe }) {
-  const { recipes } = useRecipes();
+export default function RecipeLibrary({ favorites, plannedThisWeek, onOpenRecipe, onAddRecipe, onRestore }) {
+  const { recipes, hidden } = useRecipes();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
   const [tags, setTags] = useState([]);
@@ -62,6 +62,27 @@ export default function RecipeLibrary({ favorites, plannedThisWeek, onOpenRecipe
         </div>
         <TagFilter selected={tags} onChange={setTags} />
       </div>
+
+      {hidden.length > 0 && query === "" && filter === "All" && tags.length === 0 && (
+        <details className="hidden-recipes">
+          <summary>
+            {hidden.length} removed from the book
+          </summary>
+          <ul className="list">
+            {hidden.map((r) => (
+              <li key={r.id} className="row hidden-row">
+                <div className="title">
+                  <strong>{r.name}</strong>
+                  <small>{recipeSummary(r)}</small>
+                </div>
+                <button className="btn" onClick={() => onRestore(r.id)}>
+                  Put back
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
 
       {visible.length === 0 ? (
         <div className="empty">

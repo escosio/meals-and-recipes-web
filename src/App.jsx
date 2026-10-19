@@ -6,8 +6,9 @@ import RecipeDetail from "./components/RecipeDetail";
 import RecipePicker from "./components/RecipePicker";
 import ShoppingList from "./components/ShoppingList";
 import RecipeForm from "./components/RecipeForm";
+import SyncSheet, { statusLabel } from "./components/SyncSheet";
 import { RecipesProvider } from "./lib/RecipesContext";
-import { useLocalStorage } from "./hooks/useLocalStorage";
+import { useHousehold } from "./hooks/useHousehold";
 import { PLAN_MEALS, PRIMARY_MEAL, buildLibrary, randomRecipe, newRecipeId } from "./lib/recipes";
 import { startOfWeek, weekDays, toISODate, weekdayShort, parseISODate } from "./lib/dates";
 import { DEFAULT_ROUTINE, resolveSlot, toList, dowOf, dowName } from "./lib/plan";
@@ -21,19 +22,24 @@ const VIEWS = [
 export default function App() {
   const [view, setView] = useState("recipes");
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
-  const [plan, setPlan] = useLocalStorage("meals.plan.v1", {});
-  const [checked, setChecked] = useLocalStorage("meals.checked.v1", {});
-  const [extras, setExtras] = useLocalStorage("meals.extras.v1", {});
-  const [routine, setRoutine] = useLocalStorage("meals.routine.v6", DEFAULT_ROUTINE);
-  // Recipes added in the app, stored raw so they can be synced later.
-  const [customRecipes, setCustomRecipes] = useLocalStorage("meals.recipes.v1", []);
-  const [favoriteIds, setFavoriteIds] = useLocalStorage("meals.favorites.v1", []);
+  // Everything the household shares. Local-only until a household code is set.
+  const household = useHousehold({ plan: {}, routine: DEFAULT_ROUTINE, checked: {}, extras: {}, recipes: [], favorites: [], hidden: [] });
+  const { plan, routine, checked, extras, recipes: customRecipes, favorites: favoriteIds, hidden: hiddenIds } = household.data;
+  const { update } = household;
+  const setPlan = useCallback((v) => update("plan", v), [update]);
+  const setRoutine = useCallback((v) => update("routine", v), [update]);
+  const setChecked = useCallback((v) => update("checked", v), [update]);
+  const setExtras = useCallback((v) => update("extras", v), [update]);
+  const setCustomRecipes = useCallback((v) => update("recipes", v), [update]);
+  const setFavoriteIds = useCallback((v) => update("favorites", v), [update]);
+  const setHiddenIds = useCallback((v) => update("hidden", v), [update]);
+  const [syncOpen, setSyncOpen] = useState(false);
   const favorites = useMemo(() => new Set(favoriteIds), [favoriteIds]);
   const toggleFavorite = useCallback(
     (id) => setFavoriteIds((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id])),
     [setFavoriteIds],
   );
-  const library = useMemo(() => buildLibrary(customRecipes), [customRecipes]);
+  const library = useMemo(() => buildLibrary(customRecipes, hiddenIds), [customRecipes, hiddenIds]);
   const { recipes, getRecipe } = library;
   const [editing, setEditing] = useState(null); // null | "new" | raw recipe being edited
 
@@ -196,21 +202,45 @@ export default function App() {
     if (isNew) setDetail({ recipeId: entry.id });
   };
 
+  // Custom recipes are deleted outright; built-ins are hidden and can be restored.
   const deleteRecipe = (id) => {
     const r = getRecipe(id);
-    if (!window.confirm(`Delete ${r?.name || "this recipe"}? Nights that use it will show it as missing.`)) return;
-    setCustomRecipes((list) => list.filter((x) => x.id !== id));
+    if (!r) return;
+    if (r.custom) {
+      if (!window.confirm(`Delete ${r.name}? This can't be undone.`)) return;
+      setCustomRecipes((list) => list.filter((x) => x.id !== id));
+      setToast(`${r.name} deleted`);
+    } else {
+      if (!window.confirm(`Remove ${r.name} from the book? You can bring it back from the bottom of the Recipes page.`)) return;
+      setHiddenIds((list) => (list.includes(id) ? list : [...list, id]));
+      setToast(`${r.name} removed from the book`);
+    }
     setEditing(null);
     setDetail(null);
-    setToast("Recipe deleted");
+  };
+
+  const restoreRecipe = (id) => {
+    setHiddenIds((list) => list.filter((x) => x !== id));
+    setToast(`${getRecipe(id)?.name || "Recipe"} is back in the book`);
   };
 
   return (
     <RecipesProvider value={library}>
     <div className="app">
       <header className="topbar">
-        <div className="brand">
-          Meals <span>&amp; Recipes</span>
+        <div className="brand-row">
+          <div className="brand">
+            Meals <span>&amp; Recipes</span>
+          </div>
+          <button
+            className={`sync-pill ${household.status}`}
+            onClick={() => setSyncOpen(true)}
+            title={statusLabel(household.status)}
+            aria-label={`Sync: ${statusLabel(household.status)}`}
+          >
+            <span className="dot" aria-hidden="true" />
+            {household.code ? "Shared" : "Sync"}
+          </button>
         </div>
         <nav className="tabs" aria-label="Sections">
           {VIEWS.map((v) => (
@@ -239,6 +269,7 @@ export default function App() {
             plannedThisWeek={plannedThisWeek}
             onOpenRecipe={(id) => setDetail({ recipeId: id })}
             onAddRecipe={() => setEditing("new")}
+            onRestore={restoreRecipe}
           />
         )}
         {view === "shop" && (
@@ -281,6 +312,7 @@ export default function App() {
           setDetail(null);
           setEditing(recipe.raw);
         }}
+        onDelete={deleteRecipe}
       />
       <RecipeForm
         open={!!editing}
@@ -288,6 +320,16 @@ export default function App() {
         onClose={() => setEditing(null)}
         onSave={saveRecipe}
         onDelete={deleteRecipe}
+      />
+      <SyncSheet
+        open={syncOpen}
+        onClose={() => setSyncOpen(false)}
+        code={household.code}
+        status={household.status}
+        onCreate={household.create}
+        onJoin={household.join}
+        onLeave={household.leave}
+        onToast={setToast}
       />
       <RecipePicker
         open={!!picker}

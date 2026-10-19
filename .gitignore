@@ -24,3 +24,9 @@ yarn-error.log*
 
 # playwright screenshots
 /.playwright-mcp
+
+# secrets and python
+.env
+.venv/
+__pycache__/
+.pytest_cache/

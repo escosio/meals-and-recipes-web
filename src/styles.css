@@ -122,6 +122,92 @@ a {
   font-weight: 500;
 }
 
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sync-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  padding: 4px 10px 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+
+.sync-pill:hover {
+  border-color: var(--ink-2);
+}
+
+.sync-pill .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.sync-pill.synced .dot {
+  background: var(--green);
+}
+
+.sync-pill.connecting .dot,
+.sync-pill.offline .dot {
+  background: var(--gold);
+}
+
+.sync-pill.error .dot,
+.sync-pill.missing .dot {
+  background: var(--red);
+}
+
+.code-display {
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-align: center;
+  padding: 18px 0 6px;
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: "wdth" 90;
+}
+
+.help {
+  color: var(--ink-2);
+  font-size: 15px;
+  margin: 8px 0 0;
+}
+
+.sync-options {
+  display: grid;
+  gap: 18px;
+}
+
+.sync-option {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.sync-option h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.sync-option .btn,
+.sync-option form {
+  margin-top: 12px;
+}
+
+.sync-option input {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
 .tabs {
   display: flex;
   gap: 2px;
@@ -741,6 +827,33 @@ a {
 
 .group-head:first-child {
   margin-top: 0;
+}
+
+.hidden-recipes {
+  margin: 0 0 18px;
+}
+
+.hidden-recipes summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 6px 0;
+}
+
+.hidden-recipes .list {
+  margin-top: 6px;
+}
+
+.hidden-row {
+  cursor: default;
+}
+
+.hidden-row:hover {
+  background: transparent;
+}
+
+.hidden-row .title strong {
+  color: var(--muted);
 }
 
 .empty {

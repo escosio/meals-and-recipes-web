@@ -111,6 +111,37 @@ describe("adding recipes", () => {
   });
 });
 
+describe("removing recipes", () => {
+  test("a built-in recipe can be removed from the book and put back", () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: /^Hot Dogs/ }));
+    fireEvent.click(openSheet("Hot Dogs").getByRole("button", { name: "Remove from book" }));
+    expect(screen.queryByRole("button", { name: /^Hot Dogs/ })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("1 removed from the book"));
+    fireEvent.click(screen.getByRole("button", { name: "Put back" }));
+    expect(screen.getByRole("button", { name: /^Hot Dogs/ })).toBeInTheDocument();
+    expect(screen.queryByText(/removed from the book/)).not.toBeInTheDocument();
+  });
+
+  test("a removed recipe still shows on a night that already uses it", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    goTo("Plan");
+    const empty = screen.getAllByRole("button", { name: /dinner: nothing planned$/ })[0];
+    const dayName = empty.getAttribute("aria-label").split(" ")[0];
+    fireEvent.click(empty);
+    await user.type(openSheet(`${dayName} dinner`).getByRole("searchbox"), "tacos");
+    fireEvent.click(openSheet(`${dayName} dinner`).getByRole("button", { name: /^Tacos/ }));
+
+    goTo("Recipes");
+    fireEvent.click(screen.getByRole("button", { name: /^Tacos/ }));
+    fireEvent.click(openSheet("Tacos").getByRole("button", { name: "Remove from book" }));
+    goTo("Plan");
+    expect(screen.getByRole("button", { name: new RegExp(`^${dayName} dinner: Tacos`) })).toBeInTheDocument();
+  });
+});
+
 describe("favorites", () => {
   test("starring a recipe puts it in a Favorites section at the top of the book and the picker", () => {
     render(<App />);

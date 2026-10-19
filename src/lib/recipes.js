@@ -97,10 +97,14 @@ export const builtInRecipes = rawRecipes.map(normalise).sort(byName);
  * are stored raw (same shape as recipes.ts entries, plus id and custom: true)
  * so they can be saved as plain JSON and later synced between phones.
  */
-export function buildLibrary(customRaw = []) {
+export function buildLibrary(customRaw = [], hiddenIds = []) {
   const custom = customRaw.map(normalise);
-  const recipes = [...builtInRecipes, ...custom].sort(byName);
-  const map = new Map(recipes.map((r) => [r.id, r]));
+  const all = [...builtInRecipes, ...custom].sort(byName);
+  const hiddenSet = new Set(hiddenIds);
+  // Removed built-ins stay resolvable (a planned night still shows them) but leave the book.
+  const recipes = all.filter((r) => !hiddenSet.has(r.id));
+  const hidden = all.filter((r) => hiddenSet.has(r.id));
+  const map = new Map(all.map((r) => [r.id, r]));
   QUICK_OPTIONS.forEach((q) => map.set(q.id, q));
   const getRecipe = (id) => {
     if (!id) return null;
@@ -113,7 +117,7 @@ export function buildLibrary(customRaw = []) {
     }
     return null;
   };
-  return { recipes, getRecipe };
+  return { recipes, hidden, getRecipe };
 }
 
 /** A unique id for a new custom recipe, avoiding clashes with existing ones. */
