@@ -17,7 +17,7 @@ function Text({ text }) {
   );
 }
 
-export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot, routine, favorites, onToggleFavorite, onClose, onAssign, onRemove, onRepeat, onSwap, onEdit }) {
+export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot, routine, favorites, onToggleFavorite, onClose, onAssign, onRemove, onRepeat, onSwap, onEdit, onDelete }) {
   const { getRecipe } = useRecipes();
   const recipe = getRecipe(recipeId);
   const [checked, setChecked] = useState({});
@@ -52,6 +52,11 @@ export default function RecipeDetail({ open, recipeId, slot, weekStart, getSlot,
     </>
   ) : (
     <>
+      {!recipe.isNote && (
+        <button className="btn danger" onClick={() => onDelete(recipe.id)}>
+          {recipe.custom ? "Delete" : "Remove from book"}
+        </button>
+      )}
       {recipe.custom && (
         <button className="btn quiet" onClick={() => onEdit(recipe)}>
           Edit

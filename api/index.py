@@ -53,6 +53,7 @@ class Document(BaseModel):
     extras: dict | None = None
     recipes: list | None = None
     favorites: list | None = None
+    hidden: list | None = None
 
     def present(self) -> dict:
         return {k: v for k, v in self.model_dump().items() if v is not None and k in SYNC_KEYS}

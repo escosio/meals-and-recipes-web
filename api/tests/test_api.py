@@ -30,6 +30,7 @@ def test_create_seeds_the_document_and_returns_a_readable_code():
     assert doc["data"]["plan"] == {"2026-10-19": {"Dinner": ["tacos"]}}
     assert doc["data"]["favorites"] == ["tacos"]
     assert doc["data"]["routine"] is None
+    assert doc["data"]["hidden"] is None
 
 
 def test_patch_replaces_only_the_keys_sent():

@@ -14,7 +14,7 @@ import json
 import os
 from datetime import datetime, timezone
 
-SYNC_KEYS = ("plan", "routine", "checked", "extras", "recipes", "favorites")
+SYNC_KEYS = ("plan", "routine", "checked", "extras", "recipes", "favorites", "hidden")
 
 
 def _now() -> str:

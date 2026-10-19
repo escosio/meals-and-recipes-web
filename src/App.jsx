@@ -23,8 +23,8 @@ export default function App() {
   const [view, setView] = useState("recipes");
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   // Everything the household shares. Local-only until a household code is set.
-  const household = useHousehold({ plan: {}, routine: DEFAULT_ROUTINE, checked: {}, extras: {}, recipes: [], favorites: [] });
-  const { plan, routine, checked, extras, recipes: customRecipes, favorites: favoriteIds } = household.data;
+  const household = useHousehold({ plan: {}, routine: DEFAULT_ROUTINE, checked: {}, extras: {}, recipes: [], favorites: [], hidden: [] });
+  const { plan, routine, checked, extras, recipes: customRecipes, favorites: favoriteIds, hidden: hiddenIds } = household.data;
   const { update } = household;
   const setPlan = useCallback((v) => update("plan", v), [update]);
   const setRoutine = useCallback((v) => update("routine", v), [update]);
@@ -32,13 +32,14 @@ export default function App() {
   const setExtras = useCallback((v) => update("extras", v), [update]);
   const setCustomRecipes = useCallback((v) => update("recipes", v), [update]);
   const setFavoriteIds = useCallback((v) => update("favorites", v), [update]);
+  const setHiddenIds = useCallback((v) => update("hidden", v), [update]);
   const [syncOpen, setSyncOpen] = useState(false);
   const favorites = useMemo(() => new Set(favoriteIds), [favoriteIds]);
   const toggleFavorite = useCallback(
     (id) => setFavoriteIds((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id])),
     [setFavoriteIds],
   );
-  const library = useMemo(() => buildLibrary(customRecipes), [customRecipes]);
+  const library = useMemo(() => buildLibrary(customRecipes, hiddenIds), [customRecipes, hiddenIds]);
   const { recipes, getRecipe } = library;
   const [editing, setEditing] = useState(null); // null | "new" | raw recipe being edited
 
@@ -201,13 +202,26 @@ export default function App() {
     if (isNew) setDetail({ recipeId: entry.id });
   };
 
+  // Custom recipes are deleted outright; built-ins are hidden and can be restored.
   const deleteRecipe = (id) => {
     const r = getRecipe(id);
-    if (!window.confirm(`Delete ${r?.name || "this recipe"}? Nights that use it will show it as missing.`)) return;
-    setCustomRecipes((list) => list.filter((x) => x.id !== id));
+    if (!r) return;
+    if (r.custom) {
+      if (!window.confirm(`Delete ${r.name}? This can't be undone.`)) return;
+      setCustomRecipes((list) => list.filter((x) => x.id !== id));
+      setToast(`${r.name} deleted`);
+    } else {
+      if (!window.confirm(`Remove ${r.name} from the book? You can bring it back from the bottom of the Recipes page.`)) return;
+      setHiddenIds((list) => (list.includes(id) ? list : [...list, id]));
+      setToast(`${r.name} removed from the book`);
+    }
     setEditing(null);
     setDetail(null);
-    setToast("Recipe deleted");
+  };
+
+  const restoreRecipe = (id) => {
+    setHiddenIds((list) => list.filter((x) => x !== id));
+    setToast(`${getRecipe(id)?.name || "Recipe"} is back in the book`);
   };
 
   return (
@@ -255,6 +269,7 @@ export default function App() {
             plannedThisWeek={plannedThisWeek}
             onOpenRecipe={(id) => setDetail({ recipeId: id })}
             onAddRecipe={() => setEditing("new")}
+            onRestore={restoreRecipe}
           />
         )}
         {view === "shop" && (
@@ -297,6 +312,7 @@ export default function App() {
           setDetail(null);
           setEditing(recipe.raw);
         }}
+        onDelete={deleteRecipe}
       />
       <RecipeForm
         open={!!editing}

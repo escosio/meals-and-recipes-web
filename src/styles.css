@@ -829,6 +829,33 @@ a {
   margin-top: 0;
 }
 
+.hidden-recipes {
+  margin: 0 0 18px;
+}
+
+.hidden-recipes summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 6px 0;
+}
+
+.hidden-recipes .list {
+  margin-top: 6px;
+}
+
+.hidden-row {
+  cursor: default;
+}
+
+.hidden-row:hover {
+  background: transparent;
+}
+
+.hidden-row .title strong {
+  color: var(--muted);
+}
+
 .empty {
   padding: 40px 0;
   text-align: center;

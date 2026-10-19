@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import { useLocalStorage } from "./useLocalStorage";
 
-export const SYNC_KEYS = ["plan", "routine", "checked", "extras", "recipes", "favorites"];
+export const SYNC_KEYS = ["plan", "routine", "checked", "extras", "recipes", "favorites", "hidden"];
 const POLL_MS = 5000;
 const WRITE_DEBOUNCE_MS = 500;
 
