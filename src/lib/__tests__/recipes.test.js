@@ -22,6 +22,12 @@ describe("built-in recipe data", () => {
     builtInRecipes.forEach((r) => expect(r.name.length).toBeGreaterThan(0));
   });
 
+  test("renamed recipes keep their old ids", () => {
+    const { getRecipe } = buildLibrary();
+    expect(getRecipe("chile").name).toBe("Chili");
+    expect(getRecipe("spahetti-tomatoes-and-chicken").name).toBe("Spaghetti, Tomatoes and Chicken");
+  });
+
   test("recipes are sorted by name", () => {
     const names = builtInRecipes.map((r) => r.name);
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));

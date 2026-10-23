@@ -308,7 +308,8 @@ export const recipes: Recipe[] = [
   },
   {
     meal: "Dinner",
-    mealName: "Spahetti, Tomatoes and Chicken",
+    mealName: "Spaghetti, Tomatoes and Chicken",
+    id: "spahetti-tomatoes-and-chicken", // keeps existing plans pointing at this recipe
     tags: ["Italian", "Summer"],
     ingredient:
       "2 skinless chicken breast halves (1 lb), diced in 1 inch cubes, cooking spray, 1/2 tsp each of dried oregano and dried basil, kosher salt and fresh pepper, to taste, 8 oz spaghetti, gluten-free or whole wheat, 2 cups grape tomatoes, halved, 6 cloves garlic, smashed and coarsely chopped, 4 tsp extra virgin olive oil, 4 tbsp chopped fresh basil",
@@ -317,7 +318,8 @@ export const recipes: Recipe[] = [
   },
   {
     meal: "Dinner",
-    mealName: "Chile",
+    mealName: "Chili",
+    id: "chile", // keeps existing plans pointing at this recipe
     tags: ["Cold weather"],
     ingredient: "1 tbsp olive oil\n1/2 large white onion, chopped\n3 cloves garlic, finely chopped\n2 tbsp tomato paste\n1 1/2 lb ground beef\n1 1/2 tbsp chili powder\n1 tsp dried oregano\n1 tsp ground cumin\n1/2 tsp paprika\n1/4 tsp cayenne pepper (optional)\nSalt and pepper\n1 (28-oz) can crushed tomatoes\n1 (15-oz) can kidney beans, drained\nShredded cheddar, sour cream and sliced scallions, for serving",
     instructions:
