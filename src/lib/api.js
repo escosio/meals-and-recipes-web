@@ -1,5 +1,6 @@
 // Thin client for the sync API (api/index.py). Same-origin, so it works on
-// Vercel and through the dev proxy without any configuration.
+// Vercel and through the dev proxy without any configuration, and the browser
+// sends the session cookie with every request.
 
 class ApiError extends Error {
   constructor(status, message) {
@@ -25,9 +26,14 @@ async function request(method, path, body) {
 }
 
 export const api = {
-  create: (seed) => request("POST", "/api/households", seed),
-  read: (code, since) => request("GET", `/api/households/${code}${since ? `?since=${encodeURIComponent(since)}` : ""}`),
-  update: (code, patch) => request("PATCH", `/api/households/${code}`, patch),
+  me: () => request("GET", "/api/me"),
+  signIn: (credential) => request("POST", "/api/auth/google", { credential }),
+  signOut: () => request("POST", "/api/auth/logout"),
+  create: (seed) => request("POST", "/api/household", seed),
+  join: (code) => request("POST", "/api/household/join", { code }),
+  leave: () => request("POST", "/api/household/leave"),
+  read: (since) => request("GET", `/api/household${since ? `?since=${encodeURIComponent(since)}` : ""}`),
+  update: (patch) => request("PATCH", "/api/household", patch),
 };
 
 export { ApiError };

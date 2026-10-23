@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["MEALS_STORE=memory", "GOOGLE_CLIENT_ID=preview.apps.googleusercontent.com", ".venv/bin/uvicorn", "api.index:app", "--port", "8000"],
+      "port": 8000
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["BROWSER=none", "npm", "start"],
+      "port": 3000
+    }
+  ]
+}

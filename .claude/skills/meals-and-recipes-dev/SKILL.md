@@ -38,10 +38,12 @@ This is a family weekly meal planner. It started as a Bootstrap recipe list (202
 
 ### Sync
 - **Rejected: Firebase/Firestore.** The `firebase-sync` branch was never merged. The project chose its own small Python API with Postgres instead.
-- **No accounts.** A household is a 6-character code from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, which leaves out look-alike characters so a code can be read aloud. One phone creates the code, which seeds the server with that phone's data. Other phones join, and the server's data replaces theirs. A share link `?join=CODE` joins once and then removes the parameter from the URL.
+- **Sign in with Google; the household code is only an invite.** (Changed in October 2026 from code-only sharing, where the code was the only credential.) The page renders Google Identity Services' button (`GoogleButton.jsx`), sends the ID token to `POST /api/auth/google`, and the API verifies it with `google-auth` and sets an HttpOnly, SameSite=Lax session cookie (`meals_session`, path `/api`, 90 days; only its SHA-256 is stored). A user (Google `sub`) belongs to at most one household (`users.household`). `/api/household` reads and writes the signed-in user's household; there is no endpoint that reads a household by code. Chosen because it is free, needs no email sending, and kept the small FastAPI + Postgres stack. The client ID comes from `GOOGLE_CLIENT_ID` on the server via `GET /api/me`, so there is one setting, not a build-time one.
+- **Codes** are 6 characters from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, which leaves out look-alike characters so a code can be read aloud. Creating a household seeds the server with that phone's data. Joining replaces a phone's data with the server's. A share link `?join=CODE` joins once and removes the parameter; signed out, it remembers the code and opens Sync to sign in.
+- **The phone remembers its household** (`meals.household.v1`) and account (`meals.account.v1`). Signing in rejoins a remembered household (this is how phones from before sign-in migrated), keeping unsent edits. If the account is already in a different household, the server wins and unsent edits are dropped. Signing out keeps the phone's data and leaves it working alone.
 - **Local first.** `useHousehold` always caches to localStorage, and without a code the app works fully offline on one phone.
 - **Wire protocol**: `PATCH` replaces only the top-level keys it sends (`jsonb ||`, last write wins per key). `GET ?since=<version>` returns `{changed:false}` when nothing has changed. The version is the row's `updated_at` timestamp (and `+` arriving as a space is handled). The client debounces writes by 500 ms, polls every 5 s while the tab is visible, and never overwrites a key that has unsent local edits (`dirty`). After a PATCH the client **does not** adopt the returned version, so the next poll fetches the whole document and picks up anything another phone wrote in between. A key is only cleared from `dirty` if it wasn't edited again while the request was out.
-- **Status values**: `local`, `connecting`, `synced`, `offline` (fetch threw, status 0), `error`, `missing` (404, polling stops).
+- **Status values**: `local`, `signed-out` (a household but no session; any 401 clears the cached account and stops polling), `connecting`, `synced`, `offline` (fetch threw, status 0), `error`, `missing` (404, polling stops).
 - **Adding a synced key** means touching all of these: `SYNC_KEYS` in `api/store.py` **and** `src/hooks/useHousehold.js`, the `Document` model in `api/index.py`, the defaults passed to `useHousehold` in `App.jsx`, a setter wrapped in `update(key, …)`, and API tests and hook tests.
 
 ### UI
@@ -56,9 +58,10 @@ This is a family weekly meal planner. It started as a Bootstrap recipe list (202
 - **Vitest** replaced react-scripts' Jest (`vitest.config.mjs`, jsdom, globals). Run it with `npm test`. Unit tests are in `src/lib/__tests__`, and UI flow tests are in `src/__tests__/App.test.jsx`.
 - **Query by role and accessible name** (`getByRole("dialog")`, `getByRole("button", {name})`, `getByLabelText`). Use the `openSheet(title)` helper to find the open dialog. Use buttons and labels a screen reader can name, so tests can find them too.
 - `setupTests.js` adds a stand-in for `showModal`/`close` (jsdom has no dialog API) and stubs `window.confirm` to return true.
-- Sync tests use `src/__tests__/fakeServer.js`, an in-memory copy of the API (one household `ABC234`, version `vN`). Keep it matching `api/index.py`.
+- Sync tests use `src/__tests__/fakeServer.js`, an in-memory copy of the API (one phone's session, one household `ABC234`, version `vN`). Keep it matching `api/index.py`. `fakeGoogle(name)` in the same file stands in for Google's script: its button signs in as `name@example.com`.
 - Clear localStorage in `beforeEach`. If a test needs a routine, seed `meals.routine.v1` itself.
-- **API**: `python -m pytest api -q` uses `MEALS_STORE=memory` and needs no database. Clear the store between clients with `store.cache_clear()`.
+- **API**: `python -m pytest api -q` uses `MEALS_STORE=memory` and needs no database. A fixture clears the store and overrides `google_verifier` with a fake (credential `"alice"` signs in as alice@example.com), so no test talks to Google.
+- **Node 22** (as in CI). Vitest 5 fails to start on older Node (20.9 did); `nvm use 22`.
 - Each feature commit adds or updates a test that describes how a user experiences the change ("a removed recipe still shows on a night that already uses it").
 
 ## CI and checks before committing
@@ -73,4 +76,5 @@ This is a family weekly meal planner. It started as a Bootstrap recipe list (202
 
 ## Known gaps (check before building on sync)
 - **Merging is per whole key.** Two phones editing different days of `plan` at the same moment can overwrite each other, because the whole `plan` object is replaced. Finer-grained merging would need a change to the protocol.
-- **The code is the only credential.** Anyone who has it can read and write, and nothing limits request rates.
+- **A code never expires.** Anyone with a Google account and the code can join, and there is no way yet to issue a new code or remove another member. Nothing limits request rates.
+- **One household per user.** Joining another household moves the account there.

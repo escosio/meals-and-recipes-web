@@ -24,7 +24,7 @@ const VIEWS = [
 export default function App() {
   const [view, setView] = useState("recipes");
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
-  // Everything the household shares. Local-only until a household code is set.
+  // Everything the household shares. Local-only until signed in and in a household.
   const household = useHousehold({ plan: {}, routine: DEFAULT_ROUTINE, checked: {}, extras: {}, recipes: [], favorites: [], hidden: [] });
   const { plan, routine, checked, extras, recipes: customRecipes, favorites: favoriteIds, hidden: hiddenIds } = household.data;
   const { update } = household;
@@ -38,6 +38,7 @@ export default function App() {
   const [syncOpen, setSyncOpen] = useState(false);
 
   // Opening a share link (?join=CODE) joins that household once, then cleans the URL.
+  // Signed out, it remembers the code and opens Sync to sign in.
   const { join: joinHousehold, code: currentCode } = household;
   useEffect(() => {
     const code = joinCodeFromUrl();
@@ -47,7 +48,14 @@ export default function App() {
       return;
     }
     joinHousehold(code)
-      .then(() => setToast("Joined the household. Your plans are now shared."))
+      .then((result) => {
+        if (result === "joined") {
+          setToast("Joined the household. Your plans are now shared.");
+          return;
+        }
+        setToast("Sign in with Google to join the household.");
+        setSyncOpen(true);
+      })
       .catch((err) => setToast(err.status === 404 ? "That share link doesn't match a household." : "Couldn't join right now. Try again from Sync."))
       .finally(clearJoinParam);
     // Run once on load only.
@@ -287,7 +295,7 @@ export default function App() {
             aria-label={`Sync: ${statusLabel(household.status)}`}
           >
             <span className="dot" aria-hidden="true" />
-            {household.code ? "Shared" : "Sync"}
+            {household.status === "signed-out" ? "Sign in" : household.code ? "Shared" : "Sync"}
           </button>
         </div>
         <nav className="tabs" aria-label="Sections">
@@ -375,6 +383,10 @@ export default function App() {
         onClose={() => setSyncOpen(false)}
         code={household.code}
         status={household.status}
+        user={household.user}
+        googleClientId={household.googleClientId}
+        onSignIn={household.signIn}
+        onSignOut={household.signOut}
         onCreate={household.create}
         onJoin={household.join}
         onLeave={household.leave}
