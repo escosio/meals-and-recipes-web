@@ -62,6 +62,29 @@ test("joining replaces local data with the shared document, and local edits are 
   expect(server.docs.ABC234.data.checked).toEqual({ "2026-10-19": { "meatballs:0": true } });
 });
 
+test("an edit from another phone just before a local write still arrives", async () => {
+  const server = fakeServer();
+  server.seed({ plan: {}, favorites: ["meatballs"] });
+  vi.spyOn(window, "fetch").mockImplementation(server.fetch);
+  const { result } = renderHook(() => useHousehold(DEFAULTS));
+  await act(async () => {
+    await result.current.join("ABC234");
+  });
+  await waitFor(() => expect(result.current.status).toBe("synced"));
+
+  // The other phone stars a recipe, then this phone plans a dinner before its next poll.
+  server.docs.ABC234.data.favorites = ["meatballs", "pernil"];
+  server.docs.ABC234.version = "other-phone";
+  act(() => result.current.update("plan", { "2026-10-20": { Dinner: ["tacos"] } }));
+  await waitFor(() => expect(server.calls.some((c) => c.method === "PATCH")).toBe(true), { timeout: 2000 });
+  await waitFor(() => expect(result.current.status).toBe("synced"));
+
+  // Next poll: the other phone's favorite shows up and our plan is kept.
+  act(() => document.dispatchEvent(new Event("visibilitychange")));
+  await waitFor(() => expect(result.current.data.favorites).toEqual(["meatballs", "pernil"]));
+  expect(result.current.data.plan).toEqual({ "2026-10-20": { Dinner: ["tacos"] } });
+});
+
 test("a missing code on the server is reported and leaving goes back to local", async () => {
   const server = fakeServer();
   vi.spyOn(window, "fetch").mockImplementation(server.fetch);

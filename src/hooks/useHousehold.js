@@ -116,9 +116,12 @@ export function useHousehold(defaults) {
       const patch = {};
       for (const k of keys) patch[k] = dataRef.current[k];
       try {
-        const res = await api.update(code, patch);
-        for (const k of keys) dirty.current.delete(k);
-        version.current = res.version;
+        await api.update(code, patch);
+        // Only clear keys that weren't edited again while the request was out.
+        for (const k of keys) if (dataRef.current[k] === patch[k]) dirty.current.delete(k);
+        // Don't adopt the version the PATCH returns: another phone may have
+        // written since our last poll, and skipping ahead would hide its edits.
+        // The next poll sees a newer version and fetches the whole document.
         setStatus("synced");
       } catch (err) {
         // Keep the keys dirty; they go out on the next change or reconnect.

@@ -1,6 +1,6 @@
-// A tiny in-memory stand-in for api/index.py used by the sync tests.
-export // A tiny fake of api/index.py: one household, version bumps on every write.
-function fakeServer(initialDoc = {}) {
+// A tiny in-memory stand-in for api/index.py used by the sync tests:
+// one household, version bumps on every write.
+export function fakeServer(initialDoc = {}) {
   const docs = {};
   let n = 0;
   const calls = [];
