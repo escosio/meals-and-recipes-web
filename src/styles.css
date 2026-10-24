@@ -156,7 +156,8 @@ a {
 }
 
 .sync-pill.connecting .dot,
-.sync-pill.offline .dot {
+.sync-pill.offline .dot,
+.sync-pill.signed-out .dot {
   background: var(--gold);
 }
 
@@ -184,6 +185,22 @@ a {
 .link-preview {
   font-size: 13px;
   color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.google-button {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+  margin: 18px 0 4px;
+}
+
+.account-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 14px;
   overflow-wrap: anywhere;
 }
 

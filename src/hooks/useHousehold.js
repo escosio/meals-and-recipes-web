@@ -6,6 +6,46 @@ export const SYNC_KEYS = ["plan", "routine", "checked", "extras", "recipes", "fa
 const POLL_MS = 5000;
 const WRITE_DEBOUNCE_MS = 500;
 
+/**
+ * Keys with edits the server hasn't got yet. Kept in localStorage so an edit
+ * made while signed out or offline isn't overwritten by the server's copy
+ * after the app reloads.
+ */
+class DirtyKeys extends Set {
+  static load() {
+    try {
+      return new DirtyKeys(JSON.parse(window.localStorage.getItem("meals.dirty.v1")) || []);
+    } catch {
+      return new DirtyKeys();
+    }
+  }
+
+  save() {
+    try {
+      window.localStorage.setItem("meals.dirty.v1", JSON.stringify(Array.from(this)));
+    } catch {
+      // Storage full or blocked; the in-memory set still works.
+    }
+  }
+
+  add(key) {
+    super.add(key);
+    this.save();
+    return this;
+  }
+
+  delete(key) {
+    const had = super.delete(key);
+    this.save();
+    return had;
+  }
+
+  clear() {
+    super.clear();
+    this.save();
+  }
+}
+
 function readCache(key, fallback) {
   try {
     const raw = window.localStorage.getItem(`meals.${key}.v1`);
@@ -17,24 +57,35 @@ function readCache(key, fallback) {
 
 /**
  * The household's shared state. Always cached in localStorage so the app
- * works alone. With a household code set, the same keys live in one document
- * on the server that every phone with the code reads and writes:
+ * works alone. Once signed in with Google and in a household, the same keys
+ * live in one document on the server that every member's phone reads and
+ * writes:
  *
  *  - local edits are sent as a PATCH of just the changed keys, debounced
  *  - the server is polled while the tab is visible; remote changes are applied
  *    to any key that has no unsent local edit
  *
- * status: "local" (no code), "connecting", "synced", "offline", "error", "missing" (code not found).
+ * `code` is the household this phone belongs to, cached so a phone that was
+ * signed out (or set up before sign-in existed) rejoins it on its next sign-in.
+ *
+ * status: "local" (no household), "signed-out" (household but no session),
+ * "connecting", "synced", "offline", "error", "missing" (household not found).
  */
 export function useHousehold(defaults) {
   const [code, setCode] = useLocalStorage("meals.household.v1", null);
+  const [user, setUser] = useLocalStorage("meals.account.v1", null);
+  const [googleClientId, setGoogleClientId] = useState(null);
   const [data, setData] = useState(() => Object.fromEntries(SYNC_KEYS.map((k) => [k, readCache(k, defaults[k])])));
-  const [status, setStatus] = useState(code ? "connecting" : "local");
+  const [status, setStatus] = useState(!code ? "local" : user ? "connecting" : "signed-out");
+  const signedIn = Boolean(user);
 
-  const dirty = useRef(new Set());
+  const dirty = useRef(null);
+  if (dirty.current === null) dirty.current = DirtyKeys.load();
   const version = useRef(null);
   const dataRef = useRef(data);
   dataRef.current = data;
+  const codeRef = useRef(code);
+  codeRef.current = code;
 
   // Cache every key locally.
   useEffect(() => {
@@ -57,11 +108,45 @@ export function useHousehold(defaults) {
     });
   }, []);
 
-  // Poll the household document while a code is set and the tab is visible.
+  /** Note the server's reply to an auth-protected call: 401 means the session is gone. */
+  const checkAuth = useCallback(
+    (err) => {
+      if (err.status === 401) setUser(null);
+      return err;
+    },
+    [setUser],
+  );
+
+  // Ask the server who is signed in. It is the source of truth for the
+  // household once signed in; offline, the cached account is kept.
   useEffect(() => {
+    let cancelled = false;
+    api
+      .me()
+      .then((me) => {
+        if (cancelled) return;
+        setGoogleClientId(me.googleClientId);
+        setUser(me.user);
+        if (me.user && me.household !== codeRef.current) {
+          dirty.current.clear();
+          setCode(me.household);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [setCode, setUser]);
+
+  // Poll the household document while signed in, in a household, and the tab is visible.
+  useEffect(() => {
+    version.current = null;
     if (!code) {
-      version.current = null;
       setStatus("local");
+      return undefined;
+    }
+    if (!signedIn) {
+      setStatus("signed-out");
       return undefined;
     }
     let cancelled = false;
@@ -74,7 +159,7 @@ export function useHousehold(defaults) {
         return;
       }
       try {
-        const res = await api.read(code, version.current);
+        const res = await api.read(version.current);
         if (cancelled) return;
         if (res.changed) {
           version.current = res.version;
@@ -83,9 +168,11 @@ export function useHousehold(defaults) {
         setStatus("synced");
       } catch (err) {
         if (cancelled) return;
+        checkAuth(err);
+        if (err.status === 401) return; // signed out; polling resumes after sign-in
         if (err.status === 404) {
           setStatus("missing");
-          return; // stop polling; the code is gone
+          return; // stop polling; the household is gone
         }
         setStatus(err.status === 0 ? "offline" : "error");
       }
@@ -106,17 +193,17 @@ export function useHousehold(defaults) {
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [code, applyRemote]);
+  }, [code, signedIn, applyRemote, checkAuth]);
 
   // Push local changes, debounced so a flurry of checkbox taps is one request.
   useEffect(() => {
-    if (!code || dirty.current.size === 0) return undefined;
+    if (!code || !signedIn || dirty.current.size === 0) return undefined;
     const t = setTimeout(async () => {
       const keys = Array.from(dirty.current);
       const patch = {};
       for (const k of keys) patch[k] = dataRef.current[k];
       try {
-        await api.update(code, patch);
+        await api.update(patch);
         // Only clear keys that weren't edited again while the request was out.
         for (const k of keys) if (dataRef.current[k] === patch[k]) dirty.current.delete(k);
         // Don't adopt the version the PATCH returns: another phone may have
@@ -125,39 +212,86 @@ export function useHousehold(defaults) {
         setStatus("synced");
       } catch (err) {
         // Keep the keys dirty; they go out on the next change or reconnect.
-        setStatus(err.status === 0 ? "offline" : err.status === 404 ? "missing" : "error");
+        checkAuth(err);
+        if (err.status !== 401) setStatus(err.status === 0 ? "offline" : err.status === 404 ? "missing" : "error");
       }
     }, WRITE_DEBOUNCE_MS);
     return () => clearTimeout(t);
-  }, [data, code]);
+  }, [data, code, signedIn, checkAuth]);
 
   const update = useCallback((key, next) => {
     dirty.current.add(key);
     setData((prev) => ({ ...prev, [key]: typeof next === "function" ? next(prev[key]) : next }));
   }, []);
 
+  /**
+   * Sign in with the credential from Google's button. A phone that already
+   * had a household rejoins it; one whose account is already in a household
+   * takes that household's data. Returns the household code, or null.
+   */
+  const signIn = useCallback(
+    async (credential) => {
+      const me = await api.signIn(credential);
+      let target = me.household;
+      if (!target && codeRef.current) {
+        try {
+          await api.join(codeRef.current);
+          target = codeRef.current;
+        } catch (err) {
+          if (err.status !== 404) throw err;
+        }
+      }
+      // Unsent edits only carry over when rejoining the same household.
+      if (target !== codeRef.current) dirty.current.clear();
+      setCode(target || null);
+      setUser(me.user);
+      return target || null;
+    },
+    [setCode, setUser],
+  );
+
+  /** Sign out. This phone keeps its data and works on its own. */
+  const signOut = useCallback(async () => {
+    await api.signOut().catch(() => {});
+    setUser(null);
+    setCode(null);
+  }, [setCode, setUser]);
+
   /** Create a household on the server seeded with this phone's data. */
   const create = useCallback(async () => {
-    const res = await api.create(dataRef.current);
-    version.current = res.version;
+    const res = await api.create(dataRef.current).catch((err) => Promise.reject(checkAuth(err)));
     dirty.current.clear();
     setCode(res.code);
     return res.code;
-  }, [setCode]);
+  }, [checkAuth, setCode]);
 
-  /** Join an existing household; its data replaces this phone's. */
+  /**
+   * Join an existing household; its data replaces this phone's. Signed out,
+   * the code is remembered and the phone joins on sign-in ("signed-out").
+   */
   const join = useCallback(
     async (newCode) => {
-      const res = await api.read(newCode);
+      try {
+        await api.join(newCode);
+      } catch (err) {
+        if (checkAuth(err).status !== 401) throw err;
+        setCode(newCode);
+        return "signed-out";
+      }
+      const res = await api.read();
       dirty.current.clear();
-      version.current = res.version;
       applyRemote(res.data);
       setCode(newCode);
+      return "joined";
     },
-    [applyRemote, setCode],
+    [applyRemote, checkAuth, setCode],
   );
 
-  const leave = useCallback(() => setCode(null), [setCode]);
+  /** Leave the household. Other members keep it; this phone keeps its data. */
+  const leave = useCallback(async () => {
+    if (signedIn) await api.leave().catch((err) => Promise.reject(checkAuth(err)));
+    setCode(null);
+  }, [checkAuth, setCode, signedIn]);
 
-  return { data, update, code, status, create, join, leave };
+  return { data, update, code, status, user, googleClientId, signIn, signOut, create, join, leave };
 }

@@ -2,7 +2,7 @@ import { render, screen, within, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import App from "../App";
-import { fakeServer } from "./fakeServer";
+import { fakeServer, fakeGoogle } from "./fakeServer";
 
 // The family's routine, as a household would have set it up.
 const ROUTINE = { 0: { Dinner: ["note:Leftover meatballs"] }, 4: { Dinner: ["note:takeout"] }, 6: { Dinner: ["meatballs"] } };
@@ -162,6 +162,7 @@ describe("weekly routine", () => {
 describe("share link", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    delete window.google;
     window.history.replaceState({}, "", "/");
   });
 
@@ -189,12 +190,31 @@ describe("share link", () => {
     expect(window.localStorage.getItem("meals.household.v1")).toBe("null");
   });
 
+  test("signed out, the link asks to sign in with Google and joins afterwards", async () => {
+    const server = fakeServer({}, { signedIn: false });
+    server.seed({ plan: {}, favorites: ["empanadas"] });
+    vi.spyOn(window, "fetch").mockImplementation(server.fetch);
+    fakeGoogle("partner");
+    window.history.replaceState({}, "", "/?join=abc234");
+
+    render(<App />);
+    await screen.findByText("Sign in with Google to join the household.");
+    const sheet = openSheet("Plan together");
+    expect(sheet.getByText(/This phone is in household ABC234/)).toBeInTheDocument();
+    fireEvent.click(await sheet.findByRole("button", { name: "Sign in with Google" }));
+
+    await screen.findByText("Signed in. Your plans are shared.");
+    expect(server.state.household).toBe("ABC234");
+    expect(screen.getByText("Signed in as partner@example.com.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Sync:/ })).toHaveTextContent("Shared");
+  });
+
   test("the Sync sheet offers the share link", async () => {
     const server = fakeServer();
     vi.spyOn(window, "fetch").mockImplementation(server.fetch);
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: /^Sync:/ }));
-    fireEvent.click(openSheet("Plan together").getByRole("button", { name: "Create a code" }));
+    fireEvent.click(await openSheet("Plan together").findByRole("button", { name: "Create a code" }));
     const sheet = await screen.findByText("ABC234");
     expect(sheet).toBeInTheDocument();
     expect(screen.getByText(`${window.location.origin}/?join=ABC234`)).toBeInTheDocument();

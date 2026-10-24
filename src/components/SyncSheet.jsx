@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Sheet from "./Sheet";
+import GoogleButton from "./GoogleButton";
 import { normaliseCode, joinLink } from "../lib/api";
 
 export function statusLabel(status) {
@@ -14,12 +15,42 @@ export function statusLabel(status) {
       return "Can't reach the server";
     case "missing":
       return "This household no longer exists";
+    case "signed-out":
+      return "Signed out. Sign in to sync.";
     default:
       return "Only on this phone";
   }
 }
 
-export default function SyncSheet({ open, onClose, code, status, onCreate, onJoin, onLeave, onToast }) {
+function errorMessage(err) {
+  switch (err.status) {
+    case 404:
+      return "No household with that code. Check it and try again.";
+    case 401:
+      return "Your sign-in has ended. Sign in again.";
+    case 503:
+      return "Can't sign in right now. Try again in a minute.";
+    case 0:
+      return "You're offline. Try again when connected.";
+    default:
+      return "Something went wrong. Try again.";
+  }
+}
+
+export default function SyncSheet({
+  open,
+  onClose,
+  code,
+  status,
+  user,
+  googleClientId,
+  onSignIn,
+  onSignOut,
+  onCreate,
+  onJoin,
+  onLeave,
+  onToast,
+}) {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -52,19 +83,76 @@ export default function SyncSheet({ open, onClose, code, status, onCreate, onJoi
     }
   };
 
+  // okMessage is a string, or a function of fn's result.
   const run = async (fn, okMessage) => {
     setBusy(true);
     setError(null);
     try {
-      await fn();
-      onToast(okMessage);
+      const result = await fn();
+      onToast(typeof okMessage === "function" ? okMessage(result) : okMessage);
       setInput("");
     } catch (err) {
-      setError(err.status === 404 ? "No household with that code. Check it and try again." : err.status === 0 ? "You're offline. Try again when connected." : "Something went wrong. Try again.");
+      setError(errorMessage(err));
     } finally {
       setBusy(false);
     }
   };
+
+  const signIn = (credential) =>
+    run(
+      () => onSignIn(credential),
+      (household) => (household ? "Signed in. Your plans are shared." : "Signed in"),
+    );
+
+  const account = user && (
+    <p className="help account-line">
+      Signed in as {user.email}.{" "}
+      <button
+        className="btn quiet"
+        onClick={async () => {
+          await onSignOut();
+          onToast("Signed out. This phone keeps its plans.");
+        }}
+      >
+        Sign out
+      </button>
+    </p>
+  );
+
+  const leaveButton = (
+    <button
+      className="btn danger"
+      disabled={busy}
+      onClick={() => run(onLeave, "Left the household. This phone is on its own now.")}
+    >
+      Leave household
+    </button>
+  );
+
+  if (!user) {
+    return (
+      <Sheet
+        open={open}
+        onClose={onClose}
+        title="Plan together"
+        subtitle={code ? statusLabel(status) : "One shared plan across your phones"}
+        footer={code ? leaveButton : undefined}
+      >
+        {code ? (
+          <p className="help">
+            This phone is in household {code}. Sign in with Google to keep it in step with the others.
+          </p>
+        ) : (
+          <p className="help">
+            Sign in with Google, then start a household or join one with a code. Only people who sign in and join can
+            see your plans.
+          </p>
+        )}
+        <GoogleButton clientId={googleClientId} onCredential={signIn} />
+        {error && <p className="notice">{error}</p>}
+      </Sheet>
+    );
+  }
 
   const submit = (e) => {
     e.preventDefault();
@@ -82,15 +170,7 @@ export default function SyncSheet({ open, onClose, code, status, onCreate, onJoi
         subtitle={statusLabel(status)}
         footer={
           <>
-            <button
-              className="btn danger"
-              onClick={() => {
-                onLeave();
-                onToast("Left the household. This phone is on its own now.");
-              }}
-            >
-              Leave household
-            </button>
+            {leaveButton}
             <span className="spacer" />
             <button className="btn" onClick={copy}>
               Copy code
@@ -105,11 +185,13 @@ export default function SyncSheet({ open, onClose, code, status, onCreate, onJoi
           {code}
         </div>
         <p className="help">
-          Anyone with this code sees and edits the same weeks, routine, recipes and shopping list. Send your wife the
-          link and it joins when she opens it, or read her the code to enter under Sync.
+          Everyone in the household sees and edits the same weeks, routine, recipes and shopping list. Send your wife
+          the link, or read her the code. She signs in with Google and joins.
         </p>
         <p className="help link-preview">{joinLink(code)}</p>
+        {account}
         {status === "missing" && <p className="notice">This code isn't on the server any more. Leave and create a new one.</p>}
+        {error && <p className="notice">{error}</p>}
       </Sheet>
     );
   }
@@ -147,6 +229,7 @@ export default function SyncSheet({ open, onClose, code, status, onCreate, onJoi
           </form>
         </div>
         {error && <p className="notice">{error}</p>}
+        {account}
       </div>
     </Sheet>
   );
