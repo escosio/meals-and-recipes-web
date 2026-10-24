@@ -29,8 +29,8 @@ Sync is a small Python API (`api/index.py`, FastAPI) that keeps one document per
 
 1. Create a free Postgres database at https://neon.tech and copy its pooled connection string.
 2. Put it in `.env` as `DATABASE_URL=...` (see `.env.example`). Never commit `.env`.
-3. In the Google Cloud console (free), create a project, set up the OAuth consent screen (External, just the app name and your email), then under APIs & Services, Credentials create an **OAuth client ID** of type "Web application". Add these Authorized JavaScript origins: `https://meals-and-recipes-web.vercel.app`, `http://localhost:3000` and `http://localhost`. Put the client ID in `.env` as `GOOGLE_CLIENT_ID=...`.
-4. Add the same `DATABASE_URL` and `GOOGLE_CLIENT_ID` in Vercel under Settings, Environment Variables, then redeploy. Vercel runs `api/index.py` as a serverless function automatically.
+3. Google sign-in uses the OAuth client in the "Meals Recipes" Google Cloud project, whose ID is built into `api/index.py` (`DEFAULT_GOOGLE_CLIENT_ID`; it isn't secret). Its Authorized JavaScript origins are `https://meals-and-recipes-web.vercel.app`, `http://localhost:3000` and `http://localhost`; add any new address there (Google Auth Platform, Clients). To use a different client, set `GOOGLE_CLIENT_ID` in `.env` or Vercel.
+4. Add the same `DATABASE_URL` in Vercel under Settings, Environment Variables, then redeploy. Vercel runs `api/index.py` as a serverless function automatically.
 
 In the app, tap **Sync** in the top bar and sign in with Google. One person taps "Create a code", the others sign in and enter it under "Join" (or open the share link). Phones that were already sharing a code before sign-in existed just sign in once and rejoin their household. Vercel preview URLs aren't in the allowed origins, so sign-in only works on the main URL and locally.
 
@@ -44,4 +44,4 @@ npm start                                                # in another; /api is p
 .venv/bin/python -m pytest api -q                        # API tests (no database needed)
 ```
 
-The tables are created on first use. If `DATABASE_URL` is missing the API refuses to start, and the app keeps working on one phone. Without `GOOGLE_CLIENT_ID` nobody can sign in. `.claude/launch.json` starts the API with an in-memory store (nothing touches Neon) and the client ID from `.env`.
+The tables are created on first use. If `DATABASE_URL` is missing the API refuses to start, and the app keeps working on one phone. `.claude/launch.json` starts the API with an in-memory store (nothing touches Neon).

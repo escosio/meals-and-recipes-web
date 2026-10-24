@@ -35,6 +35,11 @@ app = FastAPI(title="Meals & Recipes API", docs_url=None, redoc_url=None)
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 CODE_LENGTH = 6
 
+# The Google OAuth client for the live site. Not a secret: the page shows it
+# to the browser anyway. GOOGLE_CLIENT_ID overrides it (another client, or a
+# local one).
+DEFAULT_GOOGLE_CLIENT_ID = "203706171519-e35dquq3vrmhm74ah53gk3v06cg6sb8s.apps.googleusercontent.com"
+
 SESSION_COOKIE = "meals_session"
 SESSION_DAYS = 90  # phones stay signed in for a season
 
@@ -56,8 +61,8 @@ def store():
     return make_store()
 
 
-def google_client_id() -> str | None:
-    return os.environ.get("GOOGLE_CLIENT_ID") or None
+def google_client_id() -> str:
+    return os.environ.get("GOOGLE_CLIENT_ID") or DEFAULT_GOOGLE_CLIENT_ID
 
 
 def verify_google_credential(credential: str) -> dict:
@@ -67,8 +72,6 @@ def verify_google_credential(credential: str) -> dict:
     from google.oauth2 import id_token
 
     client_id = google_client_id()
-    if not client_id:
-        raise HTTPException(503, "Sign-in isn't set up on the server")
     try:
         claims = id_token.verify_oauth2_token(credential, google_requests.Request(), client_id)
     except TransportError:

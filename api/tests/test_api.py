@@ -39,6 +39,11 @@ def test_me_signed_out_gives_the_client_id_for_the_button():
     assert TestClient(app).get("/api/me").json() == {"googleClientId": "test-client", "user": None, "household": None}
 
 
+def test_without_the_setting_the_built_in_client_id_is_used(monkeypatch):
+    monkeypatch.delenv("GOOGLE_CLIENT_ID")
+    assert TestClient(app).get("/api/me").json()["googleClientId"].endswith(".apps.googleusercontent.com")
+
+
 def test_sign_in_sets_a_session_cookie_and_sign_out_ends_it():
     c = TestClient(app)
     res = c.post("/api/auth/google", json={"credential": "alice"})
