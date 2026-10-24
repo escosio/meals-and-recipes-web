@@ -44,4 +44,4 @@ npm start                                                # in another; /api is p
 .venv/bin/python -m pytest api -q                        # API tests (no database needed)
 ```
 
-The tables are created on first use. If `DATABASE_URL` is missing the API refuses to start, and the app keeps working on one phone. Without `GOOGLE_CLIENT_ID` nobody can sign in. `.claude/launch.json` starts the API with an in-memory store and a placeholder client ID, which is enough to see the screens but not to finish signing in.
+The tables are created on first use. If `DATABASE_URL` is missing the API refuses to start, and the app keeps working on one phone. Without `GOOGLE_CLIENT_ID` nobody can sign in. `.claude/launch.json` starts the API with an in-memory store (nothing touches Neon) and the client ID from `.env`.

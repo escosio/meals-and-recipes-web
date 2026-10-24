@@ -6,6 +6,46 @@ export const SYNC_KEYS = ["plan", "routine", "checked", "extras", "recipes", "fa
 const POLL_MS = 5000;
 const WRITE_DEBOUNCE_MS = 500;
 
+/**
+ * Keys with edits the server hasn't got yet. Kept in localStorage so an edit
+ * made while signed out or offline isn't overwritten by the server's copy
+ * after the app reloads.
+ */
+class DirtyKeys extends Set {
+  static load() {
+    try {
+      return new DirtyKeys(JSON.parse(window.localStorage.getItem("meals.dirty.v1")) || []);
+    } catch {
+      return new DirtyKeys();
+    }
+  }
+
+  save() {
+    try {
+      window.localStorage.setItem("meals.dirty.v1", JSON.stringify(Array.from(this)));
+    } catch {
+      // Storage full or blocked; the in-memory set still works.
+    }
+  }
+
+  add(key) {
+    super.add(key);
+    this.save();
+    return this;
+  }
+
+  delete(key) {
+    const had = super.delete(key);
+    this.save();
+    return had;
+  }
+
+  clear() {
+    super.clear();
+    this.save();
+  }
+}
+
 function readCache(key, fallback) {
   try {
     const raw = window.localStorage.getItem(`meals.${key}.v1`);
@@ -39,7 +79,8 @@ export function useHousehold(defaults) {
   const [status, setStatus] = useState(!code ? "local" : user ? "connecting" : "signed-out");
   const signedIn = Boolean(user);
 
-  const dirty = useRef(new Set());
+  const dirty = useRef(null);
+  if (dirty.current === null) dirty.current = DirtyKeys.load();
   const version = useRef(null);
   const dataRef = useRef(data);
   dataRef.current = data;

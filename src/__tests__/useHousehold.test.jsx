@@ -111,6 +111,31 @@ test("a phone set up with a code before sign-in rejoins its household when it si
   await waitFor(() => expect(result.current.status).toBe("synced"));
 });
 
+test("a recipe added while signed out survives a reload and goes up after sign-in", async () => {
+  const server = fakeServer({}, { signedIn: false });
+  server.seed({ recipes: [{ id: "flan", mealName: "Flan" }] });
+  window.localStorage.setItem("meals.household.v1", JSON.stringify("ABC234"));
+  vi.spyOn(window, "fetch").mockImplementation(server.fetch);
+
+  const first = renderHook(() => useHousehold(DEFAULTS));
+  await waitFor(() => expect(first.result.current.status).toBe("signed-out"));
+  const recipes = [
+    { id: "flan", mealName: "Flan" },
+    { id: "pastelon", mealName: "Pastelon" },
+  ];
+  act(() => first.result.current.update("recipes", recipes));
+  first.unmount();
+
+  // The app is closed and reopened before signing in.
+  const result = await setup(server);
+  await act(async () => {
+    await result.current.signIn("scott");
+  });
+  await waitFor(() => expect(server.docs.ABC234.data.recipes).toEqual(recipes), { timeout: 2000 });
+  await waitFor(() => expect(result.current.status).toBe("synced"));
+  expect(result.current.data.recipes).toEqual(recipes);
+});
+
 test("signing in on a new phone takes the account's household", async () => {
   const server = fakeServer({}, { signedIn: false, household: "ABC234" });
   server.seed({ plan: { "2026-10-20": { Dinner: ["pernil"] } } });

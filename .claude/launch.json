@@ -4,7 +4,7 @@
     {
       "name": "api",
       "runtimeExecutable": "env",
-      "runtimeArgs": ["MEALS_STORE=memory", "GOOGLE_CLIENT_ID=preview.apps.googleusercontent.com", ".venv/bin/uvicorn", "api.index:app", "--port", "8000"],
+      "runtimeArgs": ["MEALS_STORE=memory", ".venv/bin/uvicorn", "api.index:app", "--port", "8000"],
       "port": 8000
     },
     {
